@@ -11,7 +11,7 @@ from controller.data.variant import normalize
 
 
 class DataTripitakaHandler(BaseHandler):
-    URL = '/data/cbreader'
+    URL = '/data/tripitaka'
 
     def get(self):
         """ 数据管理-实体藏 """

@@ -17,7 +17,7 @@ class CommonLeft(UIModule):
             dict(name='首页', icon='icon_home', link='/home'),
             dict(name='CBETA', icon='icon_rs', link='/cbeta'),
             # dict(name='如是藏经', icon='icon_rs', link='/tripitaka/rs'),
-            dict(name='实体藏经', icon='icon_tripitaka', link='/tripitaka'),
+            # dict(name='实体藏经', icon='icon_tripitaka', link='/tripitaka'),
             dict(name='人员管理', icon='icon_user', id='user', sub_items=[
                 dict(name='用户管理', icon='icon_subitem', link='/user/admin'),
                 dict(name='授权管理', icon='icon_subitem', link='/user/role'),

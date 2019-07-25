@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# nohup python3 /home/sm/cbreaders/controller/data/cbeta_build.py >> /home/sm/cbeta/cbeta.log 2>&1 &
+# nohup python3 /srv/cbreader/code/controller/data/cbeta_build.py >> /srv/cbreader/log/cbeta.log 2>&1 &
 # python3 controller/data/cbeta_build.py --bm_path=BM_u8_path
 #
 # 查看实际导入的数量: curl 'localhost:9200/_cat/indices?v'
-# 查看最近导入的日志: python3 -c "print(''.join(open('/home/sm/cbeta/cbeta.log').readlines()[-5:]))"
+# 查看最近导入的日志: python3 -c "print(''.join(open('/srv/cbreader/log/cbeta.log').readlines()[-5:]))"
 
 import re
 import sys

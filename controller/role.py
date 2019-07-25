@@ -11,6 +11,7 @@
 import re
 
 url_placeholder = {
+    'tripitaka_id': r'[a-z]{3,}',
     'page_name': r'[a-zA-Z]{2}_[0-9_]+',
     'page_prefix': r'[a-zA-Z]{2}[0-9_]*',
 }
@@ -44,9 +45,9 @@ role_maps = {
             '/user/my/profile': ['GET'],
             '/api/user/my/(pwd|profile)': ['POST'],
             '/api/user/(avatar|email_code|phone_code)': ['POST'],
-            '/cbreader': ['GET'],
-            '/cbreader/rs': ['GET'],
-            '/cbreader/@cbreader_id': ['GET'],
+            '/tripitaka': ['GET'],
+            '/tripitaka/rs': ['GET'],
+            '/tripitaka/@tripitaka_id': ['GET'],
             '/data/cbeta/search': ['GET'],
         }
     },
@@ -54,7 +55,7 @@ role_maps = {
         'is_assignable': True,
         'roles': ['普通用户'],
         'routes': {
-            '/data/(cbreader|envelop|volume|sutra|reel|page)': ['GET'],
+            '/data/(tripitaka|envelop|volume|sutra|reel|page)': ['GET'],
             '/user/statistic': ['GET'],
         }
     },

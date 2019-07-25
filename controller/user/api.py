@@ -6,13 +6,7 @@
 
 import logging
 import random
-import smtplib
 from os import path
-from email.header import Header
-from email.mime.text import MIMEText
-from aliyunsdkcore.client import AcsClient
-# from aliyunsdkcore.request import CommonRequest
-from aliyunsdkcore.acs_exception.exceptions import ServerException, ClientException
 from datetime import datetime
 from bson import objectid, json_util
 from controller import errors
@@ -398,6 +392,7 @@ class SendUserEmailCodeHandler(BaseHandler):
 
     def send_email(self, receiver, content, subject="如是藏经邮箱验证"):
         """email_list邮件列表，content邮件内容，subject发送标题"""
+        '''
         msg = MIMEText('<html><h1>验证码：' + content + '</h1></html>', 'html', 'utf-8')
         account = self.config['email']['account']
         pwd = self.config['email']['key']  # 授权码
@@ -413,6 +408,7 @@ class SendUserEmailCodeHandler(BaseHandler):
             server.quit()
         except Exception as e:
             return self.send_db_error(e)
+        '''
 
 
 class SendUserPhoneCodeHandler(BaseHandler):
@@ -444,7 +440,7 @@ class SendUserPhoneCodeHandler(BaseHandler):
         key = self.config['phone']['accessKeySecret']
         template_code = self.config['phone']['template_code']
         sign_name = self.config['phone']['sign_name']
-
+        '''
         try:
             client = AcsClient(account, key, 'default')
             request = CommonRequest()
@@ -461,3 +457,4 @@ class SendUserPhoneCodeHandler(BaseHandler):
             logging.debug(resp)
         except (ServerException, ClientException) as e:
             return e
+        '''

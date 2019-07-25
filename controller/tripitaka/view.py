@@ -10,11 +10,11 @@ from controller.base import BaseHandler
 
 
 class RsTripitakaHandler(BaseHandler):
-    URL = '/cbreader/rs'
+    URL = '/tripitaka/rs'
 
     def get(self):
         """ 如是藏经 """
-        self.render('cbreader_rs.html')
+        self.render('tripitaka_rs.html')
 
 
 class CbetaHandler(BaseHandler):
@@ -29,20 +29,20 @@ class CbetaHandler(BaseHandler):
         content = transform(xml)
         article = str(content)
         article = article[article.find('<body>') + 6: article.rfind('</body>')]
-        self.render('cbreader_cbeta.html', article=article)
+        self.render('tripitaka_cbeta.html', article=article)
 
 
 class TripitakaListHandler(BaseHandler):
-    URL = '/cbreader'
+    URL = '/tripitaka'
 
     def get(self):
         """ 藏经列表 """
-        self.render('cbreader_list.html')
+        self.render('tripitaka_list.html')
 
 
 class TripitakaHandler(BaseHandler):
-    URL = '/cbreader/@cbreader_id'
+    URL = '/tripitaka/@tripitaka_id'
 
     def get(self):
         """ 单个实体藏经 """
-        self.render('cbreader.html')
+        self.render('tripitaka.html')
