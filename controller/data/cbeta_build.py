@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# nohup python3 /srv/cbreader/code/controller/data/cbeta_build.py >> /srv/cbreader/log/cbeta.log 2>&1 &
+# nohup python3 /home/sm/cbeta/code/controller/data/cbeta_build.py >> /home/sm/cbeta/cbeta.log 2>&1 &
 # python3 controller/data/cbeta_build.py --bm_path=BM_u8_path
 #
 # 查看实际导入的数量: curl 'localhost:9200/_cat/indices?v'
-# 查看最近导入的日志: python3 -c "print(''.join(open('/srv/cbreader/log/cbeta.log').readlines()[-5:]))"
+# 查看最近导入的日志: python3 -c "print(''.join(open('/home/sm/cbeta/cbeta.log').readlines()[-5:]))"
 
 import re
 import sys
@@ -20,13 +20,15 @@ from controller.data.variant import normalize
 from controller.data.rare import format_rare
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import ElasticsearchException
+from controller.app import Application
 
-BM_PATH = '/home/sm/cbeta/BM_u8'  # BM_u8所在路径，可在本文件的bm_path参数动态指定
-re_head_parts = re.compile(r'^([A-Z]{1,2}\d+)n([A-Z]?\d+)[A-Za-z_]?p([a-z]?\d+)')
+config = Application.load_config()['esearch']
+BM_PATH = config.get('BM_u8') or '/home/sm/cbeta/BM_u8'
+re_head_parts = re.compile(r'^([A-Z]{1,2})(\d+)n([A-Z]?\d+)([A-Za-z_]?)p([a-z]?\d+)')
 
 
 def junk_filter(txt):
-    txt = re.sub('<.*?>', '', txt)
+    txt = re.sub('<[^>]*>', '', txt)
     txt = re.sub(r'\[.>(.)\]', lambda m: m.group(1), txt)
     txt = re.sub(r'\[[\x00-\xff＊]*\]', '', txt)
     return txt
@@ -36,7 +38,7 @@ def cur_time():
     return datetime.now().strftime('[%H:%M:%S]')
 
 
-def add_page(index, rows, page_code):
+def add_page(index, rows, page_code, line=0):
     if rows:
         origin = [format_rare(r) for r in rows]
         normal = [normalize(r) for r in origin]
@@ -46,47 +48,69 @@ def add_page(index, rows, page_code):
                 cur_time(), page_code, len(rows), count))
             return False
 
-        volume_no = book_no = page_no = None  # 册号，经号，页码
-        head = re_head_parts.search(page_code)
+        canon_code = book_no = sutra_no = edition = page_no = None  # 藏经代码, 册号，经号，别本, 页码
+        head = re_head_parts.search(page_code)  # ^([A-Z]{1,2})(\d+)n([A-Z]?\d+)([A-Za-z_]?)p([a-z]?\d+)
         if head:
-            volume_no, book_no, page_no = head.group(1), head.group(2), head.group(3)
+            canon_code, book_no, sutra_no, edition, page_no = [head.group(i) for i in range(1, 6)]
+            book_code, sutra_code = canon_code + book_no, canon_code + sutra_no
 
         try:
+            '''
+            page_code: 页名，由册别、经号、别本、页号组成，例如 A091n1057_p0319
+            canon_code: 藏经代码，例如 A、T
+            book_no: 册号，例如 091
+            book_code: 册别，藏经代码+册号，例如 A091、GA001
+            sutra_no: 经号，例如 1057、A042
+            sutra_code: 典籍编号，藏经代码+经号，例如 A1057
+            page_no: 页号，例如 0319、b005
+            origin: 原始文本，部分组字式已替换为生僻字
+            normal: 规范文本，是对原始文本的异体字转换为规范字的结果
+            lines: 文本行数
+            char_count: 规范文本(含标点)的字数
+            updated_time: 入库时间
+            '''
             index(body=dict(
-                page_code=page_code, volume_no=volume_no, book_no=book_no, page_no=page_no,
+                page_code=page_code, canon_code=canon_code, book_no=book_no, book_code=book_code,
+                sutra_no=sutra_no, sutra_code=sutra_code, edition=edition, page_no=page_no,
                 origin=origin, normal=normal, lines=len(rows), char_count=count, updated_time=datetime.now())
             )
-            print('%s\tsuccess:\t%s\t%s lines\t %s chars' % (cur_time(), page_code, len(rows), len(origin)))
+            # print('%s\tsuccess:\t%s\t%s lines\t %s chars' % (cur_time(), page_code, len(rows), len(origin)))
+            if line > 0:
+                sys.stdout.write('%d %s,' % (line, page_code[len(book_code):]))
+            elif line < 0:
+                sys.stdout.write(page_code + '\n')
             return True
         except ElasticsearchException as e:
-            sys.stderr.write('%s\tfailed:\t%s\t%s lines\t %s chars\t%s\n' % (
-                cur_time(), page_code, len(rows), count, str(e)))
+            sys.stderr.write('err %s,' % page_code)
             return False
 
 
 def scan_and_index_dir(index, source):
     """直接导入目录中的文本数据"""
-    rows, errors, page_code = [], [], None
+    errors = []
     for i, fn in enumerate(sorted(glob(path.join(source, '**', r'new.txt')))):
-        print('processing file %s' % fn)
+        print('%s processing file %s' % (cur_time(), fn))
         with open(fn, 'r', encoding='utf-8') as f:
             lines = f.readlines()
-        for row in lines:
+        rows, page_code = [], None
+        count = 0
+        for line, row in enumerate(lines):
             texts = re.split('#{1,3}', row.strip(), 1)
             if len(texts) != 2:
                 continue
             head = re_head_parts.search(texts[0])
             if head:
                 if page_code and page_code != head.group(0):
-                    if not add_page(index, rows, page_code):
+                    count += 1
+                    if not add_page(index, rows, page_code, count):
                         errors.append(page_code)
                     rows = []
                 page_code = head.group(0)
             else:
                 print('head error:\t%s' % row)
             rows.append(junk_filter(texts[1]))
-    if not add_page(index, rows, page_code):
-        errors.append(page_code)
+        if not add_page(index, rows, page_code, -1):
+            errors.append(page_code)
 
     if errors:
         with open(path.join(source, datetime.now().strftime('error-%Y%m%d-%H%M.json')), 'w') as f:

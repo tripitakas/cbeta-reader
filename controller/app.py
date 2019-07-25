@@ -97,7 +97,7 @@ class Application(web.Application):
             config = load_yml(f, Loader=SafeLoader)
 
         for k, v in config_base.items():
-            if k not in config:
+            if not config.get(k) and v:
                 config[k] = v
 
         return config

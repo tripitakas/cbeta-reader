@@ -23,6 +23,7 @@ database:
 esearch:
   host: # 47.95.216.233
   port: 9200
+  BM_u8:
 
 # 分页
 pager:

@@ -7,6 +7,6 @@
 | canon     | 藏经    | 例如嘉兴藏、永乐北藏   |
 | tripitaka | 三藏典籍 | 经论体系，与canon同义 |
 | canon_code | 藏经编码 | 例如 T、GA |
-| sutra    | 经文    | 具体的某篇经论文章 |
-| sutra_code | 经号  | 例如 GA0008  |
+| sutra    | 经文、典籍 | 具体的某篇经论文章 |
+| sutra_code | 典籍编号 | 例如 GA0008  |
 | category | 部类    | 例如阿含部、瑜伽部 |
