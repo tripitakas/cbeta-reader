@@ -1,0 +1,30 @@
+# 用于 set_secure_cookie 的秘钥, 生成方法: https://www.v2ex.com/t/12646
+cookie_secret: 'llVZ4yR6Su2oHJ2UaV5rYEO8K5iDwEL2jKhrtUPJ8o4='
+
+# 网页公共参数
+site:
+  name: 藏经搜索和研阅平台
+  keywords: 大藏经,藏经研阅平台,CBETA
+  description: 如是我闻CBETA藏经搜索和研阅平台
+  domain: cbeta.tripitakas.net
+  # https:
+  #  certfile: cbreader.crt
+  #  keyfile: cbreader.key
+
+# MongoDB
+database:
+  name: cbreader
+  port: 27017
+  host: 127.0.0.1
+  user:
+  password:
+
+# ElasticSearch全文检索库
+esearch:
+  host: # 47.95.216.233
+  port: 9200
+
+# 分页
+pager:
+  page_size: 10
+  display_count: 5
