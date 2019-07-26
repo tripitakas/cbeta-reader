@@ -157,7 +157,7 @@ def scan_and_index_dir(index, source, book_code):
                 if juan_['fun'] == 'open':
                     juan_opened.append(juan_)
                 else:
-                    juan_opened = [p for p in juan_opened if p['n'] == juan_['n']]
+                    juan_opened = [p for p in juan_opened if p['n'] != juan_['n']]
             col_code, line = col_line[0], col_line[1:]
             if col_code not in cols:
                 cols[col_code] = [col_line, idx, col_line, idx]
@@ -186,7 +186,7 @@ def build_db(index='cb4ocr-ik', bm_path=BM_PATH, mode='create', book_code='', sp
     :param book_code: 仅导入指定册别的页面
     :param split: 中文分词器的名称，如'ik'或'jieba'
     """
-    es = index and Elasticsearch()
+    es = 0 and index and Elasticsearch()
     if not es:
         return scan_and_index_dir(None, bm_path, book_code)
 
