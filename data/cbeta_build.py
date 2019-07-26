@@ -25,6 +25,7 @@ from elasticsearch.exceptions import ElasticsearchException
 
 config = Application.load_config()['esearch']
 BM_PATH = config.get('BM_u8') or '/home/sm/cbeta/BM_u8'
+juan_path = path.join(path.dirname(__file__), 'cbeta-juan')
 re_head_parts = re.compile(r'^([A-Z]{1,2})(\d+)n([A-Z]?\d+)([A-Za-z_]?)p([a-z]?\d+)([a-z]\d+)?')
 output = dict(pages=[])
 
@@ -40,7 +41,7 @@ def cur_time():
     return datetime.now().strftime('[%H:%M:%S]')
 
 
-def add_page(index, rows, page_code, cols=None, line=0):
+def add_page(index, rows, page_code, cols, juan, line=0):
     if rows:
         origin = [format_rare(r) for r in rows]
         normal = [normalize(r) for r in origin]
@@ -66,6 +67,7 @@ def add_page(index, rows, page_code, cols=None, line=0):
             sutra_code: 典籍编号，藏经代码+经号，例如 A1057
             page_no: 页号，例如 0319、b005
             cols: {栏列号: [起始文本行序号, 终止文本行序号], 'c02': [12, 49]}
+            juan: 本页的卷项数组[{"n": "001", "fun": "open", "head": "T03n0152_p0001a03", "title": "六度集經卷第一"},]
             origin: 原始文本，部分组字式已替换为生僻字
             normal: 规范文本，是对原始文本的异体字转换为规范字的结果
             lines: 文本行数
@@ -74,17 +76,19 @@ def add_page(index, rows, page_code, cols=None, line=0):
             '''
             if index is not None:
                 index(body=dict(
-                    page_code=page_code, canon_code=canon_code, book_no=book_no, book_code=book_code,
+                    page_code=page_code, canon_code=canon_code, book_no=book_no, book_code=book_code, juan=juan,
                     sutra_no=sutra_no, sutra_code=sutra_code, edition=edition, page_no=page_no, cols=cols,
                     origin=origin, normal=normal, lines=len(rows), char_count=count, updated_time=datetime.now())
                 )
             else:
-                output['pages'].append(dict(page_code=page_code))
+                output['pages'].append(dict(page_code=page_code, juan=juan, cols=cols))
                 if line < 0:
                     codes = [p['page_code'] for p in output['pages']]
                     with open('build.log', 'a') as f:
                         f.write('%s %d pages\n%s\n' % (
                             book_code, len(output['pages']), ', '.join(codes)))
+                    with open(path.join(path.dirname(__file__), 'build_log', page_code + '.json'), 'w') as f:
+                        json.dump(output['pages'], f, ensure_ascii=False, indent=2)
                     output['pages'] = []
             if line > 0 and 0:
                 sys.stdout.write('%d %s, ' % (line, page_code[len(book_code):]))
@@ -96,9 +100,14 @@ def add_page(index, rows, page_code, cols=None, line=0):
             return False
 
 
+def merge_juan(juan_opened, juan):
+    return juan_opened + [p for p in juan if p not in juan_opened]
+
+
 def scan_and_index_dir(index, source, book_code):
     """直接导入目录中的文本数据"""
     errors = []
+    juan_files = glob(path.join(juan_path, '**', r'*.json'))
     for i, fn in enumerate(sorted(glob(path.join(source, '**', r'new.txt')))):
         if book_code and '/%s/' % book_code not in fn:
             continue
@@ -108,6 +117,8 @@ def scan_and_index_dir(index, source, book_code):
         rows, page_code = [], None
         cols = {}
         count = idx = total = 0
+        sutra_id, juan_list, juan, juan_opened = '', [], [], []
+
         for row in lines:
             texts = re.split('#{1,3}', row.strip(), 1)
             if len(texts) != 2:
@@ -115,17 +126,38 @@ def scan_and_index_dir(index, source, book_code):
             head = re_head_parts.search(texts[0])
             col_line = head and head.group(6)
             if head:
-                if page_code and page_code not in head.group(0):
+                page_code_ = head.group(0)[:-len(col_line)]
+                if page_code and page_code != page_code_:
                     count += 1
                     total += len(rows)
-                    if not add_page(index, rows, page_code, cols, count):
+                    if not add_page(index, rows, page_code, cols, merge_juan(juan_opened, juan), count):
                         errors.append(page_code)
                     rows = []
+                    juan = []
                     idx = 0
-                page_code = head.group(0)[:-len(col_line)]
+                    sutra_id_ = re.sub(r'[A-Za-z_]?p.+$', '', page_code_)
+                    if sutra_id != sutra_id_:
+                        sutra_id = sutra_id_
+                        juan_file = [f for f in juan_files if f.endswith(sutra_id + '.json')]
+                        if juan_file:
+                            with open(juan_file[0]) as f:
+                                juan_list = json.load(f)
+                        else:
+                            juan_list = []
+                page_code = page_code_
             else:
                 print('head error:\t%s' % row)
+
             rows.append(junk_filter(texts[1]))
+            juan_ = head.group(0)
+            juan_ = [p for p in juan_list if p['head'] == juan_]
+            if juan_:
+                juan_ = juan_[0]
+                juan.append(juan_)
+                if juan_['fun'] == 'open':
+                    juan_opened.append(juan_)
+                else:
+                    juan_opened = [p for p in juan_opened if p['n'] == juan_['n']]
             col_code, line = col_line[0], col_line[1:]
             if col_code not in cols:
                 cols[col_code] = [col_line, idx, col_line, idx]
@@ -133,7 +165,7 @@ def scan_and_index_dir(index, source, book_code):
                 cols[col_code][2] = col_line
                 cols[col_code][3] = idx
             idx += 1
-        if not add_page(index, rows, page_code, cols, -1):
+        if not add_page(index, rows, page_code, cols, merge_juan(juan_opened, juan), -1):
             errors.append(page_code)
         elif rows:
             count += 1
@@ -148,7 +180,7 @@ def scan_and_index_dir(index, source, book_code):
 
 def build_db(index='cb4ocr-ik', bm_path=BM_PATH, mode='create', book_code='', split='ik'):
     """ 基于CBETA文本创建索引，以便ocr寻找比对文本使用
-    :param index: 索引名称
+    :param index: 索引名称，为空时可做数据遍历检查，不导入到es库
     :param bm_path: BM_u8文本目录
     :param mode: 'create'表示新建，'update'表示更新
     :param book_code: 仅导入指定册别的页面
