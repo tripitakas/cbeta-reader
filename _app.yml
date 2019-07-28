@@ -25,6 +25,11 @@ esearch:
   port: 9200
   BM_u8:
 
+# OSS图片
+img:
+  host: 'http://img.tripitakas.net'
+  salt: '待配置'
+
 # 分页
 pager:
   page_size: 10

@@ -46,7 +46,6 @@ target/
 log/
 app.yml
 static/upload/avatar/
-static/xml/
-data/cbeta-juan/
-data/cbeta-mulu/
+data/xml/
+data/meta/
 data/build_log/
