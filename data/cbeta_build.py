@@ -185,7 +185,7 @@ def build_db(index='cb4ocr-ik', bm_path=BM_PATH, mode='create', book_code='', sp
     :param book_code: 仅导入指定册别的页面
     :param split: 中文分词器的名称，如'ik'或'jieba'
     """
-    es = 0 and index and Elasticsearch()
+    es = index and Elasticsearch()
     if not es:
         return scan_and_index_dir(None, bm_path, book_code)
 
