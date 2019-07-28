@@ -6,7 +6,7 @@
 #
 # 查看实际导入的数量: curl 'localhost:9200/_cat/indices?v'
 # 查看最近导入的日志: python3 -c "print(''.join(open('/home/sm/cbeta/cbeta.log').readlines()[-5:]))"
-# 停止导入任务: kill -9 `ps -ef | grep cbeta_build.py | grep -v grep | awk -F" " {'print $2'}` 2
+# 停止导入任务: sudo kill -9 `ps -ef | grep cbeta_build.py | grep -v grep | awk -F" " {'print $2'}` 2
 
 import re
 import sys
@@ -101,7 +101,7 @@ def add_page(index, rows, page_code, cols, juan, line=0):
                 sys.stdout.write(page_code + '\n')
             return True
         except ElasticsearchException as e:
-            sys.stderr.write('err %s,' % page_code)
+            sys.stderr.write('err %s: %s\n,' % (page_code, str(e)))
             return False
 
 
@@ -191,7 +191,7 @@ def build_db(index='cb4ocr-ik', bm_path=BM_PATH, mode='create', book_code='', sp
     :param book_code: 仅导入指定册别的页面
     :param split: 中文分词器的名称，如'ik'或'jieba'
     """
-    es = index and Elasticsearch()
+    es = index and Elasticsearch(hosts=[config])
     if not es:
         return scan_and_index_dir(None, bm_path, book_code)
 
