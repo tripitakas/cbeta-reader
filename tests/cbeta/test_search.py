@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from tests.testcase import APITestCase
-from controller.data.cbeta_search import can_search
+from controller.cbeta.esearch import can_search
 
 
 class TestSearch(APITestCase):

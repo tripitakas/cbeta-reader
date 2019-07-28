@@ -121,7 +121,7 @@ class RegisterApi(BaseHandler):
             return self.send_error_response(err)
 
         try:
-            user['roles'] = '用户管理员' if not self.db.user.find_one() else ''  # 如果是第一个用户，则设置为用户管理员
+            user['roles'] = '管理员' if not self.db.user.find_one() else ''  # 如果是第一个用户，则设置为管理员
             user['img'] = 'imgs/ava%s.png' % (1 if user.get('gender') == '男' else 2 if user.get('gender') == '女' else 3)
 
             r = self.db.user.insert_one(dict(

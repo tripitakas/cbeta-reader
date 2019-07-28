@@ -6,7 +6,7 @@
 """
 import re
 from cdifflib import CSequenceMatcher
-from controller.data.variant import is_variant
+from controller.cbeta.variant import is_variant
 
 
 class Diff(object):

@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import re
-from controller.data.diff import Diff
+from controller.cbeta.diff import Diff
 from elasticsearch import Elasticsearch
-from controller.data.variant import normalize
+from controller.cbeta.variant import normalize
 from controller.app import Application as App
 
 

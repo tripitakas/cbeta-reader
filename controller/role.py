@@ -28,41 +28,26 @@ role_maps = {
     '访客': {
         'remark': '任何人都可访问，无需登录',
         'routes': {
-            '/api': ['GET'],
-            '/api/code/(.+)': ['GET'],
+            '/': ['GET'],
+            '/help': ['GET'],
             '/user/(login|register)': ['GET'],
             '/api/user/(login|logout|register)': ['POST'],
-            # 下列只读浏览页面暂时允许匿名访问
-            '/cbeta': ['GET'],
         }
     },
     '普通用户': {
         'remark': '登录用户均可访问，无需授权',
         'routes': {
-            '/': ['GET'],
-            '/home': ['GET'],
-            '/help': ['GET'],
             '/user/my/profile': ['GET'],
             '/api/user/my/(pwd|profile)': ['POST'],
             '/api/user/(avatar|email_code|phone_code)': ['POST'],
-            '/tripitaka': ['GET'],
-            '/tripitaka/rs': ['GET'],
-            '/tripitaka/@tripitaka_id': ['GET'],
-            '/data/cbeta/search': ['GET'],
         }
     },
-    '数据管理员': {
+    '管理员': {
         'is_assignable': True,
         'roles': ['普通用户'],
         'routes': {
-            '/data/(tripitaka|envelop|volume|sutra|reel|page)': ['GET'],
-            '/user/statistic': ['GET'],
-        }
-    },
-    '用户管理员': {
-        'is_assignable': True,
-        'roles': ['普通用户'],
-        'routes': {
+            '/api': ['GET'],
+            '/api/code/(.+)': ['GET'],
             '/user/(admin|role)': ['GET'],
             '/api/user/(delete|role|profile|reset_pwd)': ['POST'],
         }

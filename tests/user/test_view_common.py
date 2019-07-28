@@ -25,14 +25,6 @@ class TestUserCommonViews(APITestCase):
         self.assert_code(200, r)
         self.assertIn('<!DOCTYPE html>', data)
 
-    def test_view_home(self):
-        """测试首页"""
-        self.add_first_user_as_admin_then_login()
-        r = self.fetch('/')
-        data = self.parse_response(r)
-        self.assert_code(200, r)
-        self.assertIn('<!DOCTYPE html>', data)
-
     def test_view_profile(self):
         """测试个人中心"""
         # 管理员
@@ -54,6 +46,7 @@ class TestUserCommonViews(APITestCase):
         self.assert_code(404, self.fetch('/xyz'))
 
     def test_view_show_api(self):
+        self.add_first_user_as_admin_then_login()
         r = self.parse_response(self.fetch('/api?_raw=1'))
         self.assertIn('handlers', r)
         for url, func, repeat, file, comment, auth in r['handlers']:

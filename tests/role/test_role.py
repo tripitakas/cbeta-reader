@@ -8,12 +8,12 @@ from controller import validate as v
 
 class TestRole(APITestCase):
     def test_func(self):
-        self.assertTrue(role.can_access('用户管理员', '/user/admin', 'GET'))
+        self.assertTrue(role.can_access('管理员', '/user/admin', 'GET'))
         self.assertFalse(role.can_access('', '/api/user/profile', 'POST'))
 
-        self.assertEqual(role.get_route_roles('/user/role', 'GET'), ['用户管理员'])
+        self.assertEqual(role.get_route_roles('/user/role', 'GET'), ['管理员'])
 
-        routes = role.get_role_routes('用户管理员, 数据管理员')
+        routes = role.get_role_routes('管理员')
         self.assertIn('/api/user/my/(pwd|profile)', routes)
 
     def test_validate(self):
@@ -36,6 +36,6 @@ class TestRole(APITestCase):
             self.assertIs(t[1].__class__, str)
 
     def test_all_roles(self):
-        roles = role.get_all_roles('数据管理员,用户管理员')
-        should = {'普通用户', '数据管理员', '用户管理员'}
+        roles = role.get_all_roles('管理员')
+        should = {'普通用户', '管理员'}
         self.assertEqual(set(roles), should)

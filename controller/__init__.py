@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from controller import com, data, user, tripitaka
+from controller import com, cbeta, user, admin
 from controller.com import invalid
 
-views = com.views + data.views + user.views + tripitaka.views
-handlers = com.handlers + data.handlers + user.handlers + [
+views = com.views + cbeta.views + user.views + admin.views
+handlers = com.handlers + cbeta.handlers + user.handlers + [
     invalid.ApiTable, invalid.ApiSourceHandler]
 modules = com.modules
 InvalidPageHandler = invalid.InvalidPageHandler

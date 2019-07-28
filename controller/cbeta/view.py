@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-@desc: 如是藏经、实体藏经
+@desc: CBETA阅读
 @time: 2019/3/13
 """
 import os
@@ -9,16 +9,8 @@ import lxml.etree as etree
 from controller.base import BaseHandler
 
 
-class RsTripitakaHandler(BaseHandler):
-    URL = '/tripitaka/rs'
-
-    def get(self):
-        """ 如是藏经 """
-        self.render('tripitaka_rs.html')
-
-
 class CbetaHandler(BaseHandler):
-    URL = '/cbeta'
+    URL = '/'
 
     def get(self):
         """ CBETA """
@@ -30,19 +22,3 @@ class CbetaHandler(BaseHandler):
         article = str(content)
         article = article[article.find('<body>') + 6: article.rfind('</body>')]
         self.render('tripitaka_cbeta.html', article=article)
-
-
-class TripitakaListHandler(BaseHandler):
-    URL = '/tripitaka'
-
-    def get(self):
-        """ 藏经列表 """
-        self.render('tripitaka_list.html')
-
-
-class TripitakaHandler(BaseHandler):
-    URL = '/tripitaka/@tripitaka_id'
-
-    def get(self):
-        """ 单个实体藏经 """
-        self.render('tripitaka.html')

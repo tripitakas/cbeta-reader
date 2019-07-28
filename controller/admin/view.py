@@ -10,11 +10,11 @@ from controller.helper import get_date_time
 from controller.op_type import get_op_def, op_in_recent_trends
 
 
-class HomeHandler(BaseHandler):
-    URL = ['/', '/home']
+class AdminHandler(BaseHandler):
+    URL = '/admin'
 
     def get(self):
-        """ 首页 """
+        """ 后台管理页面 """
         try:
             user_id = self.current_user['_id']
             visit_count = self.db.log.count_documents({'create_time': {'$gte': get_date_time('%Y-%m-%d 00:00:00')},
