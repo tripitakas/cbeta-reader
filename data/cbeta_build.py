@@ -56,6 +56,7 @@ def add_page(index, rows, page_code, cols, juan, line=0):
         if head:
             canon_code, book_no, sutra_no, edition, page_no = [head.group(i) for i in range(1, 6)]
             book_code, sutra_code = canon_code + book_no, canon_code + sutra_no
+        cols = [[c] + cols[c] for c in sorted(cols.keys())]
 
         try:
             '''
@@ -81,14 +82,15 @@ def add_page(index, rows, page_code, cols, juan, line=0):
                     origin=origin, normal=normal, lines=len(rows), char_count=count, updated_time=datetime.now())
                 )
             else:
-                output['pages'].append(dict(page_code=page_code, juan=juan, cols=cols))
+                output['pages'].append(dict(page_code=page_code, juan=juan, cols=cols,
+                                            lines=len(rows), char_count=count))
                 if line < 0:
                     codes = [p['page_code'] for p in output['pages']]
                     with open('build.log', 'a') as f:
                         f.write('%s %d pages\n%s\n' % (
                             book_code, len(output['pages']), ', '.join(codes)))
                     with open(path.join(path.dirname(__file__), 'build_log', page_code + '.json'), 'w') as f:
-                        json.dump(output['pages'], f, ensure_ascii=False, indent=2)
+                        json.dump(output['pages'], f, ensure_ascii=False)
                     output['pages'] = []
             if line > 0 and 0:
                 sys.stdout.write('%d %s, ' % (line, page_code[len(book_code):]))
@@ -154,10 +156,7 @@ def scan_and_index_dir(index, source, book_code):
             if juan_:
                 juan_ = juan_[0]
                 juan.append(juan_)
-                if juan_['fun'] == 'open':
-                    juan_opened.append(juan_)
-                else:
-                    juan_opened = [p for p in juan_opened if p['n'] != juan_['n']]
+                juan_opened = [] if juan_['fun'] == 'close' else [juan_]
             col_code, line = col_line[0], col_line[1:]
             if col_code not in cols:
                 cols[col_code] = [col_line, idx, col_line, idx]
@@ -186,7 +185,7 @@ def build_db(index='cb4ocr-ik', bm_path=BM_PATH, mode='create', book_code='', sp
     :param book_code: 仅导入指定册别的页面
     :param split: 中文分词器的名称，如'ik'或'jieba'
     """
-    es = 0 and index and Elasticsearch()
+    es = index and Elasticsearch()
     if not es:
         return scan_and_index_dir(None, bm_path, book_code)
 
