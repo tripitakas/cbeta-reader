@@ -11,7 +11,7 @@
 import re
 
 url_placeholder = {
-    'tripitaka_id': r'[a-z]{3,}',
+    'code': r'[A-Z]{1,2}\d+\w+',
     'page_name': r'[a-zA-Z]{2}_[0-9_]+',
     'page_prefix': r'[a-zA-Z]{2}[0-9_]*',
 }
@@ -29,6 +29,8 @@ role_maps = {
         'remark': '任何人都可访问，无需登录',
         'routes': {
             '/': ['GET'],
+            '/@code': ['GET'],
+            '/api/@code': ['GET'],
             '/help': ['GET'],
             '/user/(login|register)': ['GET'],
             '/api/user/(login|logout|register)': ['POST'],
@@ -42,12 +44,13 @@ role_maps = {
             '/api/user/(avatar|email_code|phone_code)': ['POST'],
         }
     },
-    '管理员': {
+    '用户管理员': {
         'is_assignable': True,
         'roles': ['普通用户'],
         'routes': {
             '/api': ['GET'],
             '/api/code/(.+)': ['GET'],
+            '/admin': ['GET'],
             '/user/(admin|role)': ['GET'],
             '/api/user/(delete|role|profile|reset_pwd)': ['POST'],
         }

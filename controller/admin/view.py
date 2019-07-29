@@ -43,7 +43,7 @@ class AdminHandler(BaseHandler):
                     context = msg
                 recent_trends.append(dict(time=t['create_time'][5:16], user=t.get('nickname'), context=context[:20]))
 
-            self.render('home.html', visit_count=1 + visit_count, last_login=last_login,
+            self.render('admin.html', visit_count=1 + visit_count, last_login=last_login,
                         recent_trends=recent_trends[:7])
         except Exception as e:
             self.send_db_error(e, render=True)

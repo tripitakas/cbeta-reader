@@ -40,3 +40,7 @@ invalid_parameter = 2008, '无效参数'
 no_object = 2009, '对象不存在或已删除'
 cannot_delete_self = 2012, '不能删除自己'
 url_not_found = 2013, '路径不存在或没有配置'
+
+sutra_code_error = 3001, '经号格式有误'
+xml_not_found = 3002, '没有找到对应的xml文件'
+juan_not_found = 3003, '没有找到对应的卷信息'

@@ -27,7 +27,7 @@ class TestUserCommonViews(APITestCase):
 
     def test_view_profile(self):
         """测试个人中心"""
-        # 管理员
+        # 用户管理员
         self.add_first_user_as_admin_then_login()
         r = self.fetch('/user/my/profile')
         self.assert_code(200, r)

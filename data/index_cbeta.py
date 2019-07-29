@@ -18,8 +18,8 @@ from functools import partial
 sys.path.append(path.dirname(path.dirname(__file__)))  # 为了使用下列controller模块
 
 from controller.app import Application
-from controller.data.variant import normalize
-from controller.data.rare import format_rare
+from controller.cbeta.variant import normalize
+from controller.cbeta.rare import format_rare
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import ElasticsearchException
 

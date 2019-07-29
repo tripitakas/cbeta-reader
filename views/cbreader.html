@@ -29,7 +29,9 @@
     background-color: #b88f6f;
     border-color: #b88f6f;
   }
+
 </style>
+
 
 <body>
 <div class="app-main">
@@ -41,7 +43,7 @@
           <div class="header-line main-line">
             <div class="left">
               <div class="panel-btn">
-                <img class="btn-img"  data-toggle="modal" data-target="#searchModal" src="{{ static_url('imgs/icon_panel.png') }}"/>
+                <img class="btn-img" data-toggle="modal" data-target="#searchModal" src="{{ static_url('imgs/icon_panel.png') }}"/>
               </div>
               <div class="title">CBETA</div>
               <div class="zone-control">
@@ -57,7 +59,7 @@
                 <span class="btn-group more-group hidden" role="group" aria-label="更多">
                   <button type="button" class="btn btn-default btn-sm btn-line-head">行首</button>
                   <button type="button" class="btn btn-default btn-sm btn-note">校勘</button>
-                  <button type="button" class="btn btn-default btn-sm btn-punctuation">标点</button>
+                  <button type="button" class="btn btn-default btn-sm btn-bd">标点</button>
                 </span>
               </div>
             </div>
@@ -87,13 +89,14 @@
           <div class="header-line sub-line">
             <div class="left">
               <div class="m-pager">
+                <div class="btn-page">卷</div>
                 <div class="btn-page first">1</div>
                 <div class="btn-page prev"><</div>
-                <div class="btn-page to"><input type="text" value="3"/></div>
+                <div class="btn-page to"><input type="text" value="{{juan}}"/></div>
                 <div class="btn-page next">></div>
-                <div class="btn-page last">80</div>
+                <div class="btn-page last">{{juan_count}}</div>
               </div>
-              <div class="btn-tools">
+              <div class="btn-tools" style="margin-left: 10px">
                 <div class="btn-txt btn-font-enlarge" title="放大字体">A+</div>
                 <div class="btn-txt btn-font-reduce" title="缩小字体">A-</div>
               </div>
@@ -129,13 +132,13 @@
         </div>
 
         <div class="content">
-          <div class="content-left slim-scroll" id="content-article">
-            <div class="article">
+          <div class="content-left slim-scroll">
+            <div id="content-article" class="article">
               {% raw article %}
             </div>
           </div>
 
-          <div class="content-center slim-scroll hide" id="content-stick">
+          <div class="content-center slim-scroll hide">
             <div class="result-items">
               <div class="result-item">
                 <div class="result-head">
@@ -153,7 +156,7 @@
             </div>
           </div>
 
-          <div class="content-right slim-scroll" id="content-search">
+          <div class="content-right slim-scroll">
             <div class="result-items">
               <div class="result-item">
                 <div class="result-head">
@@ -286,7 +289,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-          <h4 class="modal-title" id="choose-pages">快速检索</h4>
+          <h4 class="modal-title" id="choose-pages">经籍检索</h4>
         </div>
         <div class="modal-body">
           <!-- ["经号", "经名", "所属藏经", "部类", "册别", "卷数", "字数", "作译者", "时间"]-->
@@ -307,6 +310,7 @@
             <tbody>
             </tbody>
           </table>
+          <div class="notes">注：双击可查看</div>
         </div>
       </div>
     </div>
@@ -316,7 +320,7 @@
 {% include _base_js.html %}
 <script type="text/javascript" src="{{ static_url('assets/jquery-multi-select/jquery.multi-select.js') }}"></script>
 <script type="text/javascript" src="{{ static_url('assets/jquery-multi-select/jquery.quicksearch.js') }}"></script>
-<script type="text/javascript" src="{{ static_url('js/cbeta-meta.js') }}"></script>
+<script type="text/javascript" src="{{ static_url('js/cbeta-sutra.js') }}"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/v/bs/dt-1.10.18/datatables.min.js"></script>
 
 <script>
@@ -363,6 +367,32 @@
     $(this).toggleClass('active');
   });
 
+  // 显示行首
+  $('.more .btn-line-head').click(function () {
+    if ($('#content-article').hasClass('article-row'))
+      $('#content-article').removeClass('article-row').addClass('article');
+    else
+      $('#content-article').removeClass('article').addClass('article-row');
+  });
+
+  // 显示校勘
+  $('.more .btn-note').click(function () {
+    if ($(this).hasClass('active')) {
+      $('.content-left .note').hide();
+    } else {
+      $('.content-left .note').show();
+      $('.content-left .note.mod').hide();
+    }
+  });
+
+  // 显示标点
+  $('.more .btn-bd').click(function () {
+    if ($(this).hasClass('active'))
+      $('.content-left bd').hide();
+    else
+      $('.content-left bd').show();
+  });
+
   $('.sub-line .order-wrap').click(function () {
     $('.search-orders').toggleClass('hide');
   });
@@ -375,6 +405,54 @@
   });
 
   <!-- 顶部导航第二行 -->
+  function pad(str, max) {
+    str = str.toString();
+    return str.length < max ? pad("0" + str, max) : str;
+  }
+
+  // 第一卷
+  $('.sub-line .left .btn-page.first').click(function () {
+    window.location = '/{{zang + jing + "_001"}}';
+  });
+
+  // 最末卷
+  $('.sub-line .left .btn-page.last').click(function () {
+    window.location = '/{{zang + jing + "_%03d" % juan_count}}';
+  });
+
+  // 上一卷
+  $('.sub-line .left .btn-page.prev').click(function () {
+    window.location = '/{{zang + jing + "_%03d" % (juan-1)}}';
+  });
+
+  // 下一卷
+  $('.sub-line .left .btn-page.next').click(function () {
+    window.location = '/{{zang + jing + "_%03d" % (juan+1)}}';
+  });
+
+  // 跳转到第n卷
+  $('.sub-line .left .btn-page.to').on("keydown", function (event) {
+    var keyCode = event.keyCode || event.which;
+    if (keyCode == "13") {
+      var n = $('.btn-page.to input').val().trim();
+      window.location = '/{{zang + jing}}_' + pad(n, 3);
+    }
+  });
+
+  // 增加字体
+  $('.sub-line .left .btn-font-enlarge').click(function () {
+    var $article = $('.content > .content-left');
+    var cur_size = parseFloat($article.css('font-size'));
+    $article.css('font-size', cur_size+1);
+  });
+
+  // 减少字体
+  $('.sub-line .left .btn-font-reduce').click(function () {
+    var $article = $('.content > .content-left');
+    var cur_size = parseFloat($article.css('font-size'));
+    $article.css('font-size', cur_size-1);
+  });
+
   // 展开、收起顶部导航第二行
   $('.zoom .min-img').click(function () {
     $('.zoom .min-img').toggleClass('hide');
@@ -551,8 +629,23 @@
 
   $('#my-table').DataTable({
     language: language,
-    data: rows
+    data: cbeta_sutras
   });
+
+  function tableBind() {
+    // 双击时阅读
+    $('#my-table tbody tr').unbind('dblclick').dblclick(function () {
+      var sutra_id = $(this).children().first().text();
+      window.location = '/' + sutra_id;
+    });
+  }
+
+  tableBind();
+
+  $('#my-table').DataTable().on('draw', function () {
+    tableBind();
+  });
+
 
   var $modal = $('#searchConfigModal');
   $modal.on('shown.bs.modal', function () {

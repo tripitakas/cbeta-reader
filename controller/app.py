@@ -10,12 +10,12 @@ import os
 import shutil
 import pymongo
 from os import path
-from yaml import load as load_yml, SafeLoader
 from tornado import web
-from tornado.options import define, options
 from tornado.util import PY3
 from tornado.log import access_log
 from controller.role import url_placeholder
+from tornado.options import define, options
+from yaml import load as load_yml, SafeLoader
 
 __version__ = '0.0.1.90725-dev'
 BASE_DIR = path.dirname(path.dirname(__file__))
