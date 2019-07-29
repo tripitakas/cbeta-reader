@@ -64,14 +64,11 @@ class CbetaHandler(BaseHandler):
     def get_article(xml_file):
         """ 从xml_file中获取供前端展示的内容 """
 
-        def replace(txt):
-            return re.sub(
-                '[「」『』（），、：；。？！]',
-                lambda m: '<bd>%s</bd>' % m.group(0),
-                txt.group(0).replace('\n', '')
-            )
+        def replace(match):
+            txt = match.group(0).replace('\n', '')
+            return re.sub('[「」『』（），、：；。？！]', lambda m: '<bd>%s</bd>' % m.group(0), txt)
 
-        xsl = open('data/xml/taisho.xsl', 'rb')
+        xsl = open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'taisho.xsl'), 'rb')
         xslt = etree.XML(xsl.read())
         transform = etree.XSLT(xslt)
         article = transform(etree.parse(xml_file))

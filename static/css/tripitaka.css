@@ -302,7 +302,7 @@
     width: 100%;
 }
 
-.content .content-left bd {
+.content .content-left .bd {
     color: var(--Color_Brown_Darker);
 }
 
@@ -339,6 +339,7 @@
 }
 
 .content .content-left .text {
+    float: left;
     display: inline;
 }
 
