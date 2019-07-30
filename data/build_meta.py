@@ -156,8 +156,8 @@ def get_juan(code, source_type="json"):
 
     for i, juan in enumerate(juan_list):
         next = juan_list[i + 1]
-        if cmp(juan['head'], code) <= 0 <= cmp(next['head'], code) and juan['n'] == next['n']:
-            return int(juan['n'])
+        if cmp(juan['head'], code) <= 0 <= cmp(next['head'], code):
+            return int(next['n'])
     return False
 
 
