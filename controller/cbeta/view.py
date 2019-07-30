@@ -6,12 +6,11 @@
 """
 import re
 import os
-import json
 from glob2 import glob
 import lxml.etree as etree
 import controller.errors as errors
 from controller.base import BaseHandler
-from controller.cbeta.meta import get_juan, get_juan_info, XML_DIR, JUAN_DIR
+from controller.cbeta.meta import get_juan, get_juan_info, XML_DIR
 
 
 class CbetaHandler(BaseHandler):
@@ -77,7 +76,3 @@ class CbetaHandler(BaseHandler):
         re_text = r'<div class="text">([\s\S]*)</div>'
         article = re.sub(re_text, replace, article, flags=re.M)
         return article
-
-
-if __name__ == '__main__':
-    pass
