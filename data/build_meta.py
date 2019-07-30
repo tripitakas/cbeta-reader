@@ -154,13 +154,20 @@ def get_juan(code, source_type="json"):
         with open(json_file, 'r') as fp:
             juan_list = json.load(fp)
 
-    for i, juan in enumerate(juan_list):
+    for i, juan in enumerate(juan_list[:-1]):
         next = juan_list[i + 1]
         if cmp(juan['head'], code) <= 0 <= cmp(next['head'], code):
             return int(next['n'])
+    # 如果code小于第一卷
+    if cmp(juan_list[0]['head'], code) >= 0:
+        return 1
+    # 如果code大于最末卷
+    if cmp(juan_list[-1]['head'], code) <= 0:
+        return juan_list[-1]['n']
+
     return False
 
 
 if __name__ == '__main__':
-    juan = get_juan('T30n1579_p0279a08')
+    juan = get_juan('B03n0002_p0001')
     print(juan)
