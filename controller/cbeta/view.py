@@ -11,7 +11,7 @@ from glob2 import glob
 import lxml.etree as etree
 import controller.errors as errors
 from controller.base import BaseHandler
-from controller.cbeta.meta import get_juan, get_juan_cnt, XML_DIR, JUAN_DIR
+from controller.cbeta.meta import get_juan, XML_DIR, JUAN_DIR
 
 
 class CbetaHandler(BaseHandler):
