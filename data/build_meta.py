@@ -163,7 +163,7 @@ def get_juan(code, source_type="json"):
 
     # 如果code小于第一卷
     if cmp(juan_list[0]['head'], code) >= 0:
-        return 1
+        return int(re.sub('[a-z]', '', juan_list[0]['n']))
     # 如果code大于最末卷
     if cmp(juan_list[-1]['head'], code) <= 0:
         return int(re.sub('[a-z]', '', juan_list[-1]['n']))
@@ -202,5 +202,5 @@ def order_juan(source=JUAN_DIR):
 
 
 if __name__ == '__main__':
-    juan = get_juan('B06n0009_p0451')
+    juan = get_juan('A091n1066_p0311')
     print(juan)
