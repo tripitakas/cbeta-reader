@@ -29,7 +29,7 @@ config = Application.load_config()['esearch']
 BM_PATH = config.get('BM_u8') or '/home/sm/cbeta/BM_u8'
 juan_path = path.join(path.dirname(__file__), 'cbeta-juan')
 re_head_parts = re.compile(r'^([A-Z]{1,2})(\d+)n([A-Z]?\d+)([A-Za-z_]?)p([a-z]?\d+)([a-z]\d+)?')
-output = dict(pages=[])
+output = dict(pages=[], miss_juan=[])
 
 
 def junk_filter(txt):
@@ -86,6 +86,8 @@ def add_page(index, rows, page_code, juan, line=0):
             else:
                 output['pages'].append(dict(page_code=page_code, juan=juan, origin=[origin[0], origin[-1]],
                                             lines=len(rows), char_count=count))
+                if not juan:
+                    output['miss_juan'].append(page_code)
                 if line < 0:
                     codes = [p['page_code'] for p in output['pages']]
                     with open('build.log', 'a') as f:
@@ -94,6 +96,8 @@ def add_page(index, rows, page_code, juan, line=0):
                     with open(path.join(path.dirname(__file__), 'build_log', page_code + '.json'), 'w') as f:
                         json.dump(output['pages'], f, ensure_ascii=False)
                     output['pages'] = []
+                    with open(path.join(path.dirname(__file__), 'miss_juan.txt'), 'w') as f:
+                        f.write('\n'.join(output['miss_juan']))
             if line > 0 and 0:
                 sys.stdout.write('%d %s, ' % (line, page_code[len(book_code):]))
             elif line < 0 and 0:

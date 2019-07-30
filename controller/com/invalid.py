@@ -18,11 +18,12 @@ class InvalidPageHandler(BaseHandler):
         pass  # ignore roles
 
     def get(self):
-        if '/api/' in self.request.path:
+        req_path = self.request.path
+        if '/api/' in req_path:
             self.set_status(404, reason='Not found')
             return self.finish()
-        if path.exists(path.join(self.get_template_path(), self.request.path.replace('/', ''))):
-            return self.render(self.request.path.replace('/', ''))
+        if len(req_path) > 1 and path.exists(path.join(self.get_template_path(), req_path.replace('/', ''))):
+            return self.render(req_path.replace('/', ''))
         self.set_status(404, reason='Not found')
         self.render('_404.html')
 

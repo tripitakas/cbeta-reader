@@ -11,7 +11,7 @@ from controller.op_type import get_op_def, op_in_recent_trends
 
 
 class AdminHandler(BaseHandler):
-    URL = '/admin'
+    URL = ['/admin', '/']
 
     def get(self):
         """ 后台管理页面 """
