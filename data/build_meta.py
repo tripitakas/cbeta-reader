@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # nohup python3 /home/sm/cbeta/code/data/build_meta.py >> /home/sm/cbeta/cbeta.log 2>&1 &
-# python3 data/cbeta_build.py --bm_path=BM_u8_path
+# python3 data/build_meta.py --bm_path=BM_u8_path
 # 执行前，需要将 cbeta-juan、cbeta-mulu 放到本文件的目录下。
 #
 # 查看实际导入的数量: curl 'localhost:9200/_cat/indices?v'
 # 查看最近导入的日志: python3 -c "print(''.join(open('/home/sm/cbeta/cbeta.log').readlines()[-5:]))"
-# 停止导入任务: sudo kill -9 `ps -ef | grep cbeta_build.py | grep -v grep | awk -F" " {'print $2'}` 2
+# 停止导入任务: sudo kill -9 `ps -ef | grep build_meta.py | grep -v grep | awk -F" " {'print $2'}` 2
 
 import re
 import sys
