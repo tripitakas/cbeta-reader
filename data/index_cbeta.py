@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# nohup python3 /home/sm/cbeta/code/data/cbeta_build.py >> /home/sm/cbeta/cbeta.log 2>&1 &
+# nohup python3 /home/sm/cbeta/code/data/index_cbeta.py >> /home/sm/cbeta/cbeta.log 2>&1 &
 # python3 data/cbeta_build.py --bm_path=BM_u8_path
 # 执行前，需要将 cbeta-juan、cbeta-mulu 放到本文件的目录下。
 #
@@ -21,6 +21,7 @@ sys.path.append(path.dirname(path.dirname(__file__)))  # 为了使用下列contr
 from controller.app import Application
 from controller.cbeta.variant import normalize
 from controller.cbeta.rare import format_rare
+from controller.cbeta.meta import get_juan_node
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import ElasticsearchException
 
@@ -57,7 +58,9 @@ def add_page(index, rows, page_code, cols, juan, line=0):
         if head:
             canon_code, book_no, sutra_no, edition, page_no = [head.group(i) for i in range(1, 6)]
             book_code, sutra_code = canon_code + book_no, canon_code + sutra_no
-        cols = [[c] + cols[c] for c in sorted(cols.keys())]
+        cols = [[c] + [str(s) for s in cols[c]] for c in sorted(cols.keys())]
+        juan_name = juan and juan.get('title') or ''
+        juan_no = juan and juan['n'] or ''
 
         try:
             '''
@@ -69,8 +72,9 @@ def add_page(index, rows, page_code, cols, juan, line=0):
             sutra_code: 典籍编号，藏经代码+经号，例如 A1057
             page_no: 页号，例如 0319、b005
             cols: [[栏号, 起始栏列号, 起始文本行序号, 终止栏列号, 终止文本行序号]]，例如：
-                  [["a", "a01", 0, "a26", 25], ["b", "b01", 26, "b26", 51]]
-            juan: 本页的卷项数组[{"n": "001", "fun": "open", "head": "T03n0152_p0001a03", "title": "六度集經卷第一"},]
+                  [["a", "a01", '0', "a26", '25'], ["b", "b01", '26', "b26", '51']]
+            juan_name: 本页的卷名
+            juan_no: 本页的卷号
             origin: 原始文本，部分组字式已替换为生僻字
             normal: 规范文本，是对原始文本的异体字转换为规范字的结果
             lines: 文本行数
@@ -79,12 +83,13 @@ def add_page(index, rows, page_code, cols, juan, line=0):
             '''
             if index is not None:
                 index(body=dict(
-                    page_code=page_code, canon_code=canon_code, book_no=book_no, book_code=book_code, juan=juan,
+                    page_code=page_code, canon_code=canon_code, book_no=book_no, book_code=book_code,
+                    juan_name=juan_name, juan_no=juan_no,
                     sutra_no=sutra_no, sutra_code=sutra_code, edition=edition, page_no=page_no, cols=cols,
                     origin=origin, normal=normal, lines=len(rows), char_count=count, updated_time=datetime.now())
                 )
             else:
-                output['pages'].append(dict(page_code=page_code, juan=juan, cols=cols,
+                output['pages'].append(dict(page_code=page_code, juan_name=juan_name, juan_no=juan_no, cols=cols,
                                             origin=[origin[0], origin[-1]],
                                             lines=len(rows), char_count=count))
                 if line < 0:
@@ -105,14 +110,9 @@ def add_page(index, rows, page_code, cols, juan, line=0):
             return False
 
 
-def merge_juan(juan_opened, juan):
-    return juan_opened + [p for p in juan if p not in juan_opened]
-
-
 def scan_and_index_dir(index, source, book_code):
     """直接导入目录中的文本数据"""
     errors = []
-    juan_files = glob(path.join(juan_path, '**', r'*.json'))
     for i, fn in enumerate(sorted(glob(path.join(source, '**', r'new.txt')))):
         if book_code and '/%s/' % book_code not in fn:
             continue
@@ -122,7 +122,7 @@ def scan_and_index_dir(index, source, book_code):
         rows, page_code = [], None
         cols = {}
         count = idx = total = 0
-        sutra_id, juan_list, juan, juan_opened = '', [], [], []
+        sutra_id = ''
 
         for row in lines:
             texts = re.split('#{1,3}', row.strip(), 1)
@@ -135,34 +135,18 @@ def scan_and_index_dir(index, source, book_code):
                 if page_code and page_code != page_code_:
                     count += 1
                     total += len(rows)
-                    if not add_page(index, rows, page_code, cols, merge_juan(juan_opened, juan), count):
+                    if not add_page(index, rows, page_code, cols, get_juan_node(page_code), count):
                         errors.append(page_code)
                     rows = []
-                    juan = []
                     idx = 0
                     sutra_id_ = re.sub(r'[A-Za-z_]?p.+$', '', page_code_)
                     if sutra_id != sutra_id_:
                         sutra_id = sutra_id_
-                        juan_file = [f for f in juan_files if f.endswith(sutra_id + '.json')]
-                        if juan_file:
-                            with open(juan_file[0]) as f:
-                                juan_list = json.load(f)
-                        else:
-                            juan_list = []
                 page_code = page_code_
             else:
                 print('head error:\t%s' % row)
 
             rows.append(junk_filter(texts[1]))
-            juan_ = head.group(0)
-            juan_ = [p for p in juan_list if p['head'] == juan_]
-            if not juan_ and not (juan_opened and juan_opened[0]['fun'] == 'opened') and head:
-                if '<J>' in texts[1] or texts[0].endswith('J'):
-                    juan_ = [dict(fun='J', head=head.group(0), title=rows[-1])]
-            if juan_:
-                juan_ = juan_[0]
-                juan.append(juan_)
-                juan_opened = [] if juan_['fun'] == 'close' else [juan_]
             col_code, line = col_line[0], col_line[1:]
             if col_code not in cols:
                 cols[col_code] = [col_line, idx, col_line, idx]
@@ -170,7 +154,7 @@ def scan_and_index_dir(index, source, book_code):
                 cols[col_code][2] = col_line
                 cols[col_code][3] = idx
             idx += 1
-        if not add_page(index, rows, page_code, cols, merge_juan(juan_opened, juan), -1):
+        if not add_page(index, rows, page_code, cols, get_juan_node(page_code), -1):
             errors.append(page_code)
         elif rows:
             count += 1
