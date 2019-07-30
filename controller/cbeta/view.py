@@ -11,13 +11,13 @@ from glob2 import glob
 import lxml.etree as etree
 import controller.errors as errors
 from controller.base import BaseHandler
-from controller.cbeta.meta import get_juan, get_juan_cnt, XML_DIR, JUAN_DIR
+from controller.cbeta.meta import get_juan, get_juan_info, XML_DIR, JUAN_DIR
 
 
 class CbetaHandler(BaseHandler):
     URL = '/@code'
 
-    re_logic = re.compile(r'^([A-Z]{1,2})(\d+)(_(\d+))?$')
+    re_logic = re.compile(r'^([A-Z]{1,2})([A-Z]?\d+[A-Za-z]?)(_(\d+))?$')
     re_physical = re.compile(r'^([A-Z]{1,2})(\d+)n([A-Z]?\d+[A-Za-z]?)_p([a-z]?\d+)([abc]\d+)?$')
 
     def get(self, code=''):
@@ -32,29 +32,29 @@ class CbetaHandler(BaseHandler):
                 m = self.re_physical.search(code)
                 zang, jing, juan = m.group(1), m.group(3), get_juan(code)
             else:
-                return self.send_error_response(errors.sutra_code_error)
+                return self.send_error_response(errors.sutra_code_error, render=True)
 
-            # 获取总卷数
-            fuzzy_name = '%s*n%s.json' % (zang, jing)
-            juan_file = glob(os.path.join(JUAN_DIR, zang, '**', fuzzy_name))
-            if not juan_file:
-                return self.send_error_response(errors.juan_not_found)
-            with open(juan_file[0], 'r') as fp:
-                juan_list = json.load(fp)
-            juan_count = int(len(juan_list) / 2)
+            # 获取卷信息
+            juan_list = get_juan_info(zang, jing)
+            if juan_list is False:
+                return self.send_error_response(errors.juan_not_found, render=True)
 
-            # 检查卷数
-            juan = 1 if juan < 1 else juan_count if juan > juan_count else juan
+            # 检查当前卷
+            juan = 1 if juan < 1 else juan_list[-1] if juan_list and juan > juan_list[-1] else juan
 
             # 获取经文数据
             fuzzy_name = '%s*n%s_%03d.xml' % (zang, jing, int(juan))
             xml_file = glob(os.path.join(XML_DIR, 'ori', zang, '**', fuzzy_name))
             if not xml_file:
-                return self.send_error_response(errors.xml_not_found)
+                return self.send_error_response(errors.xml_not_found, render=True)
             article = self.get_article(xml_file[0])
 
+            index = juan_list.index(juan)
+            prev = juan_list[1 if index < 1 else index - 1],
+            next = juan_list[index + 1 if index < len(juan_list) - 1 else len(juan_list) - 1]
             self.render(
-                'cbreader.html', article=article, code=code, zang=zang, jing=jing, juan=juan, juan_count=juan_count,
+                'cbreader.html', article=article, code=code, zang=zang, jing=jing, juan=juan,
+                juan_list=juan_list, prev=prev, next=next
             )
 
         except Exception as e:
@@ -68,7 +68,7 @@ class CbetaHandler(BaseHandler):
             txt = match.group(0).replace('\n', '')
             return re.sub('[「」『』（），、：；。？！]', lambda m: '<bd>%s</bd>' % m.group(0), txt)
 
-        xsl = open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'taisho.xsl'), 'rb')
+        xsl = open(os.path.join(os.path.dirname(__file__), 'taisho.xsl'), 'rb')
         xslt = etree.XML(xsl.read())
         transform = etree.XSLT(xslt)
         article = transform(etree.parse(xml_file))
@@ -77,3 +77,7 @@ class CbetaHandler(BaseHandler):
         re_text = r'<div class="text">([\s\S]*)</div>'
         article = re.sub(re_text, replace, article, flags=re.M)
         return article
+
+
+if __name__ == '__main__':
+    pass

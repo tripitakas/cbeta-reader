@@ -12,6 +12,7 @@ import re
 
 url_placeholder = {
     'code': r'[A-Z]{1,2}\d+\w+',
+    'sutra_code': r'[A-Z]{1,2}\d+',
     'page_name': r'[a-zA-Z]{2}_[0-9_]+',
     'page_prefix': r'[a-zA-Z]{2}[0-9_]*',
 }
@@ -30,7 +31,7 @@ role_maps = {
         'routes': {
             '/': ['GET'],
             '/@code': ['GET'],
-            '/api/@code': ['GET'],
+            '/api/mulu': ['POST'],
             '/help': ['GET'],
             '/user/(login|register)': ['GET'],
             '/api/user/(login|logout|register)': ['POST'],

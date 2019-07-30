@@ -144,6 +144,24 @@ def is_priority(**kw):
         return {k: e.invalid_priority}
 
 
+def is_zang(**kw):
+    """ 检查是否为藏编号。"""
+    assert len(kw) == 1
+    k, v = list(kw.items())[0]
+    regex = r'^[A-Z]{1,2}$'
+    if v and not re.match(regex, str(v)):  # 值为空或空串时跳过而不检查
+        return {k: e.invalid_zang}
+
+
+def is_jing(**kw):
+    """ 检查是否为经编号。"""
+    assert len(kw) == 1
+    k, v = list(kw.items())[0]
+    regex = r'^[0-9a-z]+$'
+    if v and not re.match(regex, str(v)):  # 值为空或空串时跳过而不检查
+        return {k: e.invalid_jing}
+
+
 def between(min_v, max_v, **kw):
     assert len(kw) == 1
     k, v = list(kw.items())[0]

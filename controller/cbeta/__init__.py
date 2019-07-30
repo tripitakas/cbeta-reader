@@ -5,4 +5,5 @@ views = [
 ]
 
 handlers = [
+    api.getMuluApi
 ]

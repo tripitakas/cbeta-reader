@@ -4,6 +4,7 @@
 import re
 import json
 import os.path as path
+from glob2 import glob
 from controller.app import BASE_DIR
 
 XML_DIR = path.join(BASE_DIR, 'data', 'xml')
@@ -69,19 +70,76 @@ def get_juan(code):
         return False
 
 
-def get_juan_list(code):
-    """ 根据code获取该部经的卷信息 """
-    regex = re.compile(r'^([A-Z]{1,2})([A-Z]?\d+[A-Za-z]?)')
-    head = regex.search(code)
-    assert head and head.group(0)
-
-    filename = '%sn%s.json' % (head.group(1) + head.group(2), head.group(3))
-    json_file = path.join(JUAN_DIR, head.group(1), head.group(1) + head.group(2), filename)
-    if path.getsize(json_file) == 0:
+def get_juan_info(zang, jing, only_juan=True):
+    """ 获取卷信息
+    :param zang 藏代码，如T、GA等
+    :param jing 经号，如1、01等
+    :param only_juan 是否仅仅返回卷值"""
+    fuzzy_name = '%s*n%s.json' % (zang, jing)
+    juan_file = glob(path.join(JUAN_DIR, zang, '**', fuzzy_name))
+    if not juan_file:
+        return False
+    if path.getsize(juan_file[0]) == 0:
         return []
-    with open(json_file, 'r') as fp:
-        return json.load(fp)
+    with open(juan_file[0], 'r') as fp:
+        juan_info = json.load(fp)
+        if only_juan:
+            # 过滤掉卷值中的a/b/c等栏位信息
+            juan_info = list(set(int(re.sub('[a-z]', '', i.get("n"))) for i in juan_info))
+            juan_info.sort()
+        return juan_info
 
 
-if __name__ == '__main__':
-    print(get_juan('B09n0031_p0015'))
+def get_mulu_info(zang, jing):
+    """ 获取目录信息
+    :param zang 藏代码，如T、GA等
+    :param jing 经号，如1、01等"""
+
+    def add_node(node):
+        _node = {k: v for k, v in node.items() if k in ['route', 'text', 'children']}
+        _node['li_attr'] = {'title': node['head']}
+
+        parent = tree
+        for i in node.get('route').split('-')[:-1]:
+            parent = parent['children'][int(i) - 1]
+
+        if parent.get('children'):
+            parent['children'].append(_node)
+        else:
+            parent['children'] = [_node]
+
+    def format(mulu_list):
+        """ 将从json文件中获取的目录信息格式化为层次结构
+        依次扫描节点，根据当前节点的level和前一个节点的level的关系，设置route路由信息，然后根据路由信息构建树结构
+        route路由信息：如'1-1-2'，表示第一棵树/第一个子节点/第二个子节点 """
+        for i, mulu in enumerate(mulu_list):
+            if int(mulu['level']) == 1:
+                mulu['route'] = '%s' % (len(tree['children']) + 1)
+                add_node(mulu)
+                continue
+            pre_mulu = mulu_list[i - 1]
+            if int(mulu['level']) == int(pre_mulu['level']):
+                r1, r2 = pre_mulu['route'].rsplit('-', 1)
+                mulu['route'] = '%s-%s' % (r1, int(r2) + 1)
+                add_node(mulu)
+            elif int(mulu['level']) > int(pre_mulu['level']):
+                mulu['route'] = pre_mulu['route'] + '-1'
+                add_node(mulu)
+            elif int(mulu['level']) < int(pre_mulu['level']):
+                # 根据当前mulu的level，从pre_mulu的路由中截取对应长度的路由信息
+                pre_route = '-'.join(pre_mulu['route'].split('-')[: int(mulu['level'])])
+                r1, r2 = pre_route.rsplit('-', 1)
+                mulu['route'] = '%s-%s' % (r1, int(r2) + 1)
+                add_node(mulu)
+
+    fuzzy_name = '%s*n%s.json' % (zang, jing)
+    mulu_file = glob(path.join(MULU_DIR, zang, '**', fuzzy_name))
+    if not mulu_file:
+        return False
+    if path.getsize(mulu_file[0]) == 0:
+        return []
+    with open(mulu_file[0], 'r') as fp:
+        tree = {'level': 0, 'children': []}
+        format(json.load(fp))
+        return tree['children']
+
