@@ -11,10 +11,12 @@ MULU_DIR = path.join(BASE_DIR, 'data', 'meta', 'mulu')
 JUAN_DIR = path.join(BASE_DIR, 'data', 'meta', 'juan')
 
 
-def get_juan(code):
-    """ 根据code获取它属于第几卷。
-    :param code code可以是行编码，也可以是页编码。比对时会根据code的长度进行比较，裁剪掉多余的部分
-    :param source_type xml表示xml文本，json表示是从xml文件中提取的json信息"""
+def get_juan_node(code):
+    """
+    根据code获取卷信息
+    :param code: code可以是行编码，也可以是页编码。比对时会根据code的长度进行比较，裁剪掉多余的部分
+    :return: 卷信息，例如{"n": "001", "fun": "open", "head": "T03n0152_p0001a03", "title": "六度集經卷第一"}
+    """
 
     def cmp(page_code1, page_code2):
         # 裁剪到长度一致
@@ -37,20 +39,36 @@ def get_juan(code):
         num2 = int(re.sub('[a-zA-Z_]', '', page_code2))
         return num1 - num2
 
-    regex = re.compile(r'^([A-Z]{1,2})(\d+)n([A-Z]?\d+[A-Za-z]?)_p([a-z]?\d+)(([abc])(\d+))?')
+    regex = re.compile(r'^([A-Z]{1,2})(\d+)n([A-Z]?\d+[A-Za-z]?)[A-Za-z_]?p([a-z]?\d+)(([abc])(\d+))?')
     head = regex.search(code)
     assert head and head.group(0)
 
     filename = '%sn%s.json' % (head.group(1) + head.group(2), head.group(3))
     json_file = path.join(JUAN_DIR, head.group(1), head.group(1) + head.group(2), filename)
-    with open(json_file, 'r') as fp:
-        juan_list = json.load(fp)
+    if path.exists(json_file) and path.getsize(json_file) > 2:
+        with open(json_file, 'r') as fp:
+            try:
+                juan_list = json.load(fp)
+            except ValueError as e:
+                print('Fail to load json file(%s): %s' % (json_file, str(e)))
+                return
 
-    for i, juan in enumerate(juan_list):
-        next = juan_list[i + 1]
-        if cmp(juan['head'], code) <= 0 <= cmp(next['head'], code) and juan['n'] == next['n']:
-            return int(juan['n'])
-    return False
+        for i, juan in enumerate(juan_list):
+            if i == len(juan_list) - 1:
+                return cmp(juan['head'], code) <= 0 and juan
+            next_j = juan_list[i + 1]
+            if cmp(juan['head'], code) <= 0 <= cmp(next_j['head'], code) and juan['n'] == next_j['n']:
+                return juan
+
+
+def get_juan(code):
+    """
+    根据code获取它属于第几卷
+    :param code: 可以是行编码，也可以是页编码。比对时会根据code的长度进行比较，裁剪掉多余的部分
+    :return: 大于0的卷号或False
+    """
+    juan = get_juan_node(code)
+    return int(juan['n']) if juan else False
 
 
 def get_juan_cnt(code):
@@ -68,5 +86,4 @@ def get_juan_cnt(code):
 
 
 if __name__ == '__main__':
-    juan = get_juan('T30n1579_p0299a08')
-    print(juan)
+    print(get_juan('T30n1579_p0299a08'))
