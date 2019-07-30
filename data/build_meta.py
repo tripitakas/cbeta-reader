@@ -9,7 +9,6 @@ import os.path as path
 from lxml import etree
 from datetime import datetime
 
-
 XML_P5_DIR = './xml/xml-p5'
 MULU_DIR = './meta/mulu'
 JUAN_DIR = './meta/juan'
@@ -32,7 +31,8 @@ def extract_mulu_from_xml_p5(source=XML_P5_DIR, overwrite=False):
 
         # 获取目录信息，然后写文件
         mulu = get_mulu_from_xml(fn)
-        print('[%s]%s: mulu file has been written.' % ((datetime.now().strftime('%Y-%m-%d %H:%M:%S')), path.basename(fn)))
+        print(
+            '[%s]%s: mulu file has been written.' % ((datetime.now().strftime('%Y-%m-%d %H:%M:%S')), path.basename(fn)))
         with open(to_file, 'w') as fp:
             if mulu:
                 json.dump(mulu, fp, ensure_ascii=False)
@@ -89,7 +89,8 @@ def extract_juan_from_xml_p5(source=XML_P5_DIR, overwrite=False):
 
         # 获取卷信息，然后写文件
         juan = get_juan_from_xml(fn)
-        print('[%s]%s: juan file has been written.' % ((datetime.now().strftime('%Y-%m-%d %H:%M:%S')), path.basename(fn)))
+        print(
+            '[%s]%s: juan file has been written.' % ((datetime.now().strftime('%Y-%m-%d %H:%M:%S')), path.basename(fn)))
         with open(to_file, 'w') as fp:
             if juan:
                 json.dump(juan, fp, ensure_ascii=False)
@@ -154,10 +155,6 @@ def get_juan(code, source_type="json"):
         with open(json_file, 'r') as fp:
             juan_list = json.load(fp)
 
-    for i, juan in enumerate(juan_list[:-1]):
-        next = juan_list[i + 1]
-        if cmp(juan['head'], code) <= 0 <= cmp(next['head'], code):
-            return int(next['n'])
     # 如果code小于第一卷
     if cmp(juan_list[0]['head'], code) >= 0:
         return 1
@@ -165,9 +162,14 @@ def get_juan(code, source_type="json"):
     if cmp(juan_list[-1]['head'], code) <= 0:
         return juan_list[-1]['n']
 
+    for i, juan in enumerate(juan_list[:-1]):
+        next = juan_list[i + 1]
+        if cmp(juan['head'], code) <= 0 <= cmp(next['head'], code):
+            return int(next['n'])
+
     return False
 
 
 if __name__ == '__main__':
-    juan = get_juan('B03n0002_p0001')
+    juan = get_juan('B06n0009_p0451')
     print(juan)
