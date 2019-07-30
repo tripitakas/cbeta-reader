@@ -55,7 +55,8 @@ def get_juan(code):
 
         # 如果code小于第一卷
         if cmp(juan_list[0]['head'], code) >= 0:
-            return int(re.sub('[a-z]', '', juan_list[0]['n']))
+            s = re.sub('[^0-9].*$', '', juan_list[0]['n'])
+            return s and int(s)
 
         # 如果code大于最末卷
         if cmp(juan_list[-1]['head'], code) <= 0:
