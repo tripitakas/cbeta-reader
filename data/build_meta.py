@@ -120,7 +120,9 @@ def get_juan_from_xml(fn):
 def get_juan(code, source_type="json"):
     """ 根据code获取它属于第几卷。
     :param code code可以是行编码，也可以是页编码。比对时会根据code的长度进行比较，裁剪掉多余的部分
-    :param source_type xml表示xml文本，json表示是从xml文件中提取的json信息"""
+    :param source_type xml表示xml文本，json表示是从xml文件中提取的json信息
+    :return 第几卷 有些卷信息中带有a/b/c等栏符，返回时过滤掉
+    """
 
     def cmp(page_code1, page_code2):
         # 裁剪到长度一致
@@ -164,12 +166,12 @@ def get_juan(code, source_type="json"):
         return 1
     # 如果code大于最末卷
     if cmp(juan_list[-1]['head'], code) <= 0:
-        return juan_list[-1]['n']
+        return int(re.sub('[a-z]', '', juan_list[-1]['n']))
 
     for i, juan in enumerate(juan_list[:-1]):
         next = juan_list[i + 1]
         if cmp(juan['head'], code) <= 0 <= cmp(next['head'], code):
-            return int(next['n'])
+            return int(re.sub('[a-z]', '', next['n']))
 
     return False
 
