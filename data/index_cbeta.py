@@ -61,6 +61,8 @@ def add_page(index, rows, page_code, cols, juan, line=0):
         cols = [[c] + [str(s) for s in cols[c]] for c in sorted(cols.keys())]
         juan_name = juan and juan.get('title') or ''
         juan_no = juan and juan['n'] or ''
+        if juan == {} and index not None:
+            print('juan not found: ' + page_code)
 
         try:
             '''
