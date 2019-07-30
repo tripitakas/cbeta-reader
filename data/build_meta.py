@@ -8,6 +8,7 @@ from glob2 import glob
 import os.path as path
 from lxml import etree
 from datetime import datetime
+from functools import cmp_to_key
 
 XML_P5_DIR = './xml/xml-p5'
 MULU_DIR = './meta/mulu'
@@ -152,6 +153,9 @@ def get_juan(code, source_type="json"):
     else:
         filename = '%sn%s.json' % (head.group(1) + head.group(2), head.group(3))
         json_file = path.join(JUAN_DIR, head.group(1), head.group(1) + head.group(2), filename)
+        # 如果文件大小为0，则直接返回1
+        if os.path.getsize(json_file) == 0:
+            return 1
         with open(json_file, 'r') as fp:
             juan_list = json.load(fp)
 
@@ -168,6 +172,31 @@ def get_juan(code, source_type="json"):
             return int(next['n'])
 
     return False
+
+
+def order_juan(source=JUAN_DIR):
+    """ 卷信息排序 """
+
+    def cmp(juan1, juan2):
+        # n有两种情况，如1/1a
+        if juan1['n'] == juan2['n']:
+            return ['open', 'close'].index(juan1['fun']) - ['open', 'close'].index(juan2['fun'])
+        elif re.sub('[a-z]', '', juan1['n']) == re.sub('[a-z]', '', juan2['n']):
+            return re.sub('[0-9]', '', juan1['n']) > re.sub('[0-9]', '', juan2['n'])
+        else:
+            return re.sub('[a-z]', '', juan1['n']) > re.sub('[a-z]', '', juan2['n'])
+
+    for fn in glob(path.join(source, '**', '*.json')):
+        print('[%s]%s: processing... ' % ((datetime.now().strftime('%Y-%m-%d %H:%M:%S')), path.basename(fn)))
+        if os.path.getsize(fn) == 0:
+            continue
+        with open(fn, 'r+') as fp:
+            juan_list = json.load(fp)
+            juan_list = [r for r in juan_list if r.get('n')]
+            juan_list.sort(key=cmp_to_key(cmp))
+            fp.seek(0)
+            fp.truncate()
+            json.dump(juan_list, fp)
 
 
 if __name__ == '__main__':
