@@ -54,11 +54,10 @@ def get_juan_node(code):
                 return
 
         for i, juan in enumerate(juan_list):
-            if i == len(juan_list) - 1:
-                return cmp(juan['head'], code) <= 0 and juan
-            next_j = juan_list[i + 1]
-            if cmp(juan['head'], code) <= 0 <= cmp(next_j['head'], code) and juan['n'] == next_j['n']:
+            next_j = i + 1 < len(juan_list) and juan_list[i + 1]
+            if cmp(juan['head'], code) <= 0 and (not next_j or 0 <= cmp(next_j['head'], code)):
                 return juan
+        return {}
 
 
 def get_juan(code):
