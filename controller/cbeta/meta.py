@@ -15,7 +15,7 @@ def get_juan(code):
     """
     根据code获取它属于第几卷
     :param code: 可以是行编码，也可以是页编码。比对时会根据code的长度进行比较，裁剪掉多余的部分
-    :return: 大于0的卷号或False
+    :return: 大于0的卷号或False。有些卷信息中带有a/b/c等栏符，返回时过滤掉。
     """
 
     def cmp(page_code1, page_code2):
@@ -53,26 +53,35 @@ def get_juan(code):
                 print('Fail to load json file(%s): %s' % (json_file, str(e)))
                 return
 
-        for i, juan in enumerate(juan_list):
-            next_j = i + 1 < len(juan_list) and juan_list[i + 1]
-            if cmp(juan['head'], code) <= 0 and (not next_j or 0 <= cmp(next_j['head'], code)):
-                return int(juan['n'])
+        # 如果code小于第一卷
+        if cmp(juan_list[0]['head'], code) >= 0:
+            return int(re.sub('[a-z]', '', juan_list[0]['n']))
+
+        # 如果code大于最末卷
+        if cmp(juan_list[-1]['head'], code) <= 0:
+            return int(re.sub('[a-z]', '', juan_list[-1]['n']))
+
+        for i, juan in enumerate(juan_list[:-1]):
+            next_j = juan_list[i + 1]
+            if cmp(juan['head'], code) <= 0 <= cmp(next_j['head'], code):
+                return int(re.sub('[a-z]', '', next_j['n']))
+
         return False
 
 
-def get_juan_cnt(code):
-    """ 根据code获取该部经的总卷数 """
+def get_juan_list(code):
+    """ 根据code获取该部经的卷信息 """
     regex = re.compile(r'^([A-Z]{1,2})([A-Z]?\d+[A-Za-z]?)')
     head = regex.search(code)
     assert head and head.group(0)
 
     filename = '%sn%s.json' % (head.group(1) + head.group(2), head.group(3))
     json_file = path.join(JUAN_DIR, head.group(1), head.group(1) + head.group(2), filename)
+    if path.getsize(json_file) == 0:
+        return []
     with open(json_file, 'r') as fp:
-        juan_list = json.load(fp)
-
-    return int(len(juan_list)/2)
+        return json.load(fp)
 
 
 if __name__ == '__main__':
-    print(get_juan('T30n1579_p0299a08'))
+    print(get_juan('B09n0031_p0015'))

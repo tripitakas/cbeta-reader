@@ -99,94 +99,33 @@ def extract_juan_from_xml_p5(source=XML_P5_DIR, overwrite=False):
                 fp.write('')
 
 
+def cmp(juan1, juan2):
+    # n有两种情况，如1/1a
+    if juan1['n'] == juan2['n']:
+        return ['open', 'close'].index(juan1['fun']) - ['open', 'close'].index(juan2['fun'])
+    elif re.sub('[a-z]', '', juan1['n']) == re.sub('[a-z]', '', juan2['n']):
+        return re.sub('[0-9]', '', juan1['n']) > re.sub('[0-9]', '', juan2['n'])
+    else:
+        return re.sub('[a-z]', '', juan1['n']) > re.sub('[a-z]', '', juan2['n'])
+
+
 def get_juan_from_xml(fn):
     """ 从xml文件中获取卷信息 """
     juan = []
     root = etree.parse(fn)
     namespaces = {'cb': 'http://www.cbeta.org/ns/1.0'}
     for item in root.xpath('//cb:juan', namespaces=namespaces):
-        # 获取行首
-        lb_items = item.xpath('./preceding::*[@ed]')
-        lb = lb_items[-1].xpath('@n') if lb_items else []
-        head = '%s_p%s' % (path.basename(fn).split('.')[0], ','.join(lb))
-        juan.append({
-            'n': ','.join(item.xpath('@n')),
-            'fun': ','.join(item.xpath('@fun')),
-            'head': head
-        })
-    return juan
-
-
-def get_juan(code, source_type="json"):
-    """ 根据code获取它属于第几卷。
-    :param code code可以是行编码，也可以是页编码。比对时会根据code的长度进行比较，裁剪掉多余的部分
-    :param source_type xml表示xml文本，json表示是从xml文件中提取的json信息
-    :return 第几卷 有些卷信息中带有a/b/c等栏符，返回时过滤掉
-    """
-
-    def cmp(page_code1, page_code2):
-        # 裁剪到长度一致
-        length = min(len(page_code1), len(page_code2))
-        page_code1 = page_code1[0:length]
-        page_code2 = page_code2[0:length]
-        # 判断格式以及藏经类型是否一致
-        h1 = regex.search(page_code1)
-        h2 = regex.search(page_code2)
-        if not h1 or not h2 or h1.group(1) != h2.group(1):
-            return False
-        # 将栏位转换为数字
-        tran = dict(a='1', b='2', c='3')
-        if h1.group(5):
-            page_code1 = h1.group(1) + h1.group(2) + h1.group(3) + h1.group(4) + tran.get(h1.group(6)) + h1.group(7)
-        if h2.group(5):
-            page_code2 = h2.group(1) + h2.group(2) + h2.group(3) + h2.group(4) + tran.get(h2.group(6)) + h2.group(7)
-        # 比较大小
-        num1 = int(re.sub('[a-zA-Z_]', '', page_code1))
-        num2 = int(re.sub('[a-zA-Z_]', '', page_code2))
-        return num1 - num2
-
-    regex = re.compile(r'^([A-Z]{1,2})(\d+)n([A-Z]?\d+[A-Za-z]?)_p([a-z]?\d+)(([abc])(\d+))?')
-    head = regex.search(code)
-    assert head and head.group(0)
-    if source_type == 'xml':
-        filename = '%sn%s.xml' % (head.group(1) + head.group(2), head.group(3))
-        xml_file = path.join(XML_P5_DIR, head.group(1), head.group(1) + head.group(2), filename)
-        juan_list = get_juan_from_xml(xml_file)
-    else:
-        filename = '%sn%s.json' % (head.group(1) + head.group(2), head.group(3))
-        json_file = path.join(JUAN_DIR, head.group(1), head.group(1) + head.group(2), filename)
-        # 如果文件大小为0，则直接返回1
-        if os.path.getsize(json_file) == 0:
-            return 1
-        with open(json_file, 'r') as fp:
-            juan_list = json.load(fp)
-
-    # 如果code小于第一卷
-    if cmp(juan_list[0]['head'], code) >= 0:
-        return int(re.sub('[a-z]', '', juan_list[0]['n']))
-    # 如果code大于最末卷
-    if cmp(juan_list[-1]['head'], code) <= 0:
-        return int(re.sub('[a-z]', '', juan_list[-1]['n']))
-
-    for i, juan in enumerate(juan_list[:-1]):
-        next = juan_list[i + 1]
-        if cmp(juan['head'], code) <= 0 <= cmp(next['head'], code):
-            return int(re.sub('[a-z]', '', next['n']))
-
-    return False
+        if item.xpath('@n'):
+            # 获取行首
+            lb_items = item.xpath('./preceding::*[@ed]')
+            lb = lb_items[-1].xpath('@n') if lb_items else []
+            head = '%s_p%s' % (path.basename(fn).split('.')[0], ','.join(lb))
+            juan.append({'n': ','.join(item.xpath('@n')), 'fun': ','.join(item.xpath('@fun')), 'head': head})
+    return juan.sort(key=cmp_to_key(cmp))
 
 
 def order_juan(source=JUAN_DIR):
     """ 卷信息排序 """
-
-    def cmp(juan1, juan2):
-        # n有两种情况，如1/1a
-        if juan1['n'] == juan2['n']:
-            return ['open', 'close'].index(juan1['fun']) - ['open', 'close'].index(juan2['fun'])
-        elif re.sub('[a-z]', '', juan1['n']) == re.sub('[a-z]', '', juan2['n']):
-            return re.sub('[0-9]', '', juan1['n']) > re.sub('[0-9]', '', juan2['n'])
-        else:
-            return re.sub('[a-z]', '', juan1['n']) > re.sub('[a-z]', '', juan2['n'])
 
     for fn in glob(path.join(source, '**', '*.json')):
         print('[%s]%s: processing... ' % ((datetime.now().strftime('%Y-%m-%d %H:%M:%S')), path.basename(fn)))
@@ -202,5 +141,4 @@ def order_juan(source=JUAN_DIR):
 
 
 if __name__ == '__main__':
-    juan = get_juan('A091n1066_p0311')
-    print(juan)
+    pass
