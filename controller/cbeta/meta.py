@@ -11,11 +11,11 @@ MULU_DIR = path.join(BASE_DIR, 'data', 'meta', 'mulu')
 JUAN_DIR = path.join(BASE_DIR, 'data', 'meta', 'juan')
 
 
-def get_juan_node(code):
+def get_juan(code):
     """
-    根据code获取卷信息
-    :param code: code可以是行编码，也可以是页编码。比对时会根据code的长度进行比较，裁剪掉多余的部分
-    :return: 卷信息，例如{"n": "001", "fun": "open", "head": "T03n0152_p0001a03", "title": "六度集經卷第一"}
+    根据code获取它属于第几卷
+    :param code: 可以是行编码，也可以是页编码。比对时会根据code的长度进行比较，裁剪掉多余的部分
+    :return: 大于0的卷号或False
     """
 
     def cmp(page_code1, page_code2):
@@ -56,18 +56,8 @@ def get_juan_node(code):
         for i, juan in enumerate(juan_list):
             next_j = i + 1 < len(juan_list) and juan_list[i + 1]
             if cmp(juan['head'], code) <= 0 and (not next_j or 0 <= cmp(next_j['head'], code)):
-                return juan
-        return {}
-
-
-def get_juan(code):
-    """
-    根据code获取它属于第几卷
-    :param code: 可以是行编码，也可以是页编码。比对时会根据code的长度进行比较，裁剪掉多余的部分
-    :return: 大于0的卷号或False
-    """
-    juan = get_juan_node(code)
-    return int(juan['n']) if juan else False
+                return int(juan['n'])
+        return False
 
 
 def get_juan_cnt(code):

@@ -21,7 +21,7 @@ sys.path.append(path.dirname(path.dirname(__file__)))  # 为了使用下列contr
 from controller.app import Application
 from controller.cbeta.variant import normalize
 from controller.cbeta.rare import format_rare
-from controller.cbeta.meta import get_juan_node
+from controller.cbeta.meta import get_juan
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import ElasticsearchException
 
@@ -43,7 +43,7 @@ def cur_time():
     return datetime.now().strftime('[%H:%M:%S]')
 
 
-def add_page(index, rows, page_code, cols, juan, line=0):
+def add_page(index, rows, page_code, juan, line=0):
     if rows:
         origin = [format_rare(r) for r in rows]
         normal = [normalize(r) for r in origin]
@@ -58,11 +58,8 @@ def add_page(index, rows, page_code, cols, juan, line=0):
         if head:
             canon_code, book_no, sutra_no, edition, page_no = [head.group(i) for i in range(1, 6)]
             book_code, sutra_code = canon_code + book_no, canon_code + sutra_no
-        cols = [[c] + [str(s) for s in cols[c]] for c in sorted(cols.keys())]
-        juan_name = juan and juan.get('title') or ''
-        juan_no = juan and juan['n'] or ''
-        if juan == {} and index not None:
-            print('juan not found: ' + page_code)
+        if not juan and index is None:
+            sys.stderr.write('juan not found: %s\n' % page_code)
 
         try:
             '''
@@ -73,10 +70,7 @@ def add_page(index, rows, page_code, cols, juan, line=0):
             sutra_no: 经号，例如 1057、A042
             sutra_code: 典籍编号，藏经代码+经号，例如 A1057
             page_no: 页号，例如 0319、b005
-            cols: [[栏号, 起始栏列号, 起始文本行序号, 终止栏列号, 终止文本行序号]]，例如：
-                  [["a", "a01", '0', "a26", '25'], ["b", "b01", '26', "b26", '51']]
-            juan_name: 本页的卷名
-            juan_no: 本页的卷号
+            juan: 本页的卷号
             origin: 原始文本，部分组字式已替换为生僻字
             normal: 规范文本，是对原始文本的异体字转换为规范字的结果
             lines: 文本行数
@@ -85,14 +79,12 @@ def add_page(index, rows, page_code, cols, juan, line=0):
             '''
             if index is not None:
                 index(body=dict(
-                    page_code=page_code, canon_code=canon_code, book_no=book_no, book_code=book_code,
-                    juan_name=juan_name, juan_no=juan_no,
-                    sutra_no=sutra_no, sutra_code=sutra_code, edition=edition, page_no=page_no, cols=cols,
+                    page_code=page_code, canon_code=canon_code, book_no=book_no, book_code=book_code, juan=juan,
+                    sutra_no=sutra_no, sutra_code=sutra_code, edition=edition, page_no=page_no,
                     origin=origin, normal=normal, lines=len(rows), char_count=count, updated_time=datetime.now())
                 )
             else:
-                output['pages'].append(dict(page_code=page_code, juan_name=juan_name, juan_no=juan_no, cols=cols,
-                                            origin=[origin[0], origin[-1]],
+                output['pages'].append(dict(page_code=page_code, juan=juan, origin=[origin[0], origin[-1]],
                                             lines=len(rows), char_count=count))
                 if line < 0:
                     codes = [p['page_code'] for p in output['pages']]
@@ -118,13 +110,11 @@ def scan_and_index_dir(index, source, book_code):
     for i, fn in enumerate(sorted(glob(path.join(source, '**', r'new.txt')))):
         if book_code and '/%s/' % book_code not in fn:
             continue
-        sys.stdout.write('%s processing %s ' % (cur_time(), fn))  # eg: BM_u8/G/G083/new.txt
         with open(fn, 'r', encoding='utf-8') as f:
             lines = f.readlines()
         rows, page_code = [], None
-        cols = {}
         count = idx = total = 0
-        sutra_id = ''
+        sutra_id = juan = ''
 
         for row in lines:
             texts = re.split('#{1,3}', row.strip(), 1)
@@ -137,7 +127,8 @@ def scan_and_index_dir(index, source, book_code):
                 if page_code and page_code != page_code_:
                     count += 1
                     total += len(rows)
-                    if not add_page(index, rows, page_code, cols, get_juan_node(page_code), count):
+                    juan = get_juan(page_code) or juan
+                    if not add_page(index, rows, page_code, juan, count):
                         errors.append(page_code)
                     rows = []
                     idx = 0
@@ -149,19 +140,15 @@ def scan_and_index_dir(index, source, book_code):
                 print('head error:\t%s' % row)
 
             rows.append(junk_filter(texts[1]))
-            col_code, line = col_line[0], col_line[1:]
-            if col_code not in cols:
-                cols[col_code] = [col_line, idx, col_line, idx]
-            else:
-                cols[col_code][2] = col_line
-                cols[col_code][3] = idx
             idx += 1
-        if not add_page(index, rows, page_code, cols, get_juan_node(page_code), -1):
+
+        juan = get_juan(page_code) or juan
+        if not add_page(index, rows, page_code, juan, -1):
             errors.append(page_code)
         elif rows:
             count += 1
             total += len(rows)
-        sys.stdout.write('%d pages, %d lines\n' % (count, total))
+        sys.stdout.write('%s %s %d pages, %d lines\n' % (cur_time(), fn, count, total))
 
     if errors:
         with open(path.join(source, datetime.now().strftime('error-%Y%m%d-%H%M.json')), 'w') as f:
