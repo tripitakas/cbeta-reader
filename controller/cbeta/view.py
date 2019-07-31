@@ -49,7 +49,7 @@ class CbetaHandler(BaseHandler):
             article = self.get_article(xml_file[0])
 
             index = juan_list.index(juan)
-            prev = juan_list[1 if index < 1 else index - 1],
+            prev = juan_list[1 if index < 1 else index - 1]
             next = juan_list[index + 1 if index < len(juan_list) - 1 else len(juan_list) - 1]
             self.render(
                 'cbreader.html', article=article, code=code, zang=zang, jing=jing, juan=juan,

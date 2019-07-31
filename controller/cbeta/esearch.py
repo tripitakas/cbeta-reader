@@ -43,8 +43,11 @@ def format_hits(hits, shrink=True):
         return '<div class="shrink">%s</div>%s<div class="shrink">%s</div>' % (txt[:s], txt[s:e + 5], txt[e + 5:])
 
     for i, hit in enumerate(hits):
-        highlights = {re.sub('</?kw>', '', v): merge_kw(v) for v in hit['highlight']['normal']}
-        normal = [highlights.get(r, r) for r in hit['_source']['normal']]
+        if 'highlight' in hit:
+            highlights = {re.sub('</?kw>', '', v): merge_kw(v) for v in hit['highlight']['normal']}
+            normal = [highlights.get(r, r) for r in hit['_source']['normal']]
+        else:
+            normal = hit['_source']['normal']
         normal = ''.join(normal)
         hits[i] = {
             'score': hit['_score'],
