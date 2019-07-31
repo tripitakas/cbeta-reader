@@ -21,7 +21,7 @@ database:
 
 # ElasticSearch全文检索库
 esearch:
-  host: localhost # 47.95.216.233
+  host: 47.95.216.233 # localhost
   port: 9200
   BM_u8:
 
