@@ -451,6 +451,7 @@
 
 .result-head .title {
     cursor: pointer;
+    margin: 0 5px;
 }
 
 .result-item .result-name {
@@ -460,6 +461,13 @@
 
 .result-item .result-text:hover {
     background: var(--Color_Grey_Line);
+}
+
+.result-item kw {
+    color: var(--Color_Brown_Darker);
+}
+
+.result-item .shrink {
 }
 
 /* 各种弹框 */

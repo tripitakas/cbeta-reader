@@ -203,10 +203,51 @@ $('.main-right .content p').mouseup(function (e) {
 
 <!-- 右侧全文检索 -->
 
+var last_query = '';
+
 // 全文检索
 $('.m-header #btn-search').click(function () {
-
+  var q = $('.m-header #search-input').val().trim();
+  if (q === '') return;
+  postApi('/cbeta/search', {'data': {'q': q}}, function (res) {
+    var html = '';
+    for (var i = 0, len = res.data.hits.length; i < len; i++) {
+      var hit = res.data.hits[i];
+      html += get_hit_html(hit['sutra_code'], hit['page_code'], hit['normal']);
+    }
+    $('.content-right .result-items').html(html);
+    $('.m-header .sub-line .right .m-pager .last').css('title', Math.ceil(res.data.total/10));
+    last_query = q;
+  });
 });
+
+function get_sutra_tips(sutra_code) {
+  for (var i = 0, len = cbeta_sutras.length; i < len; i++) {
+    var sutra = cbeta_sutras[i];
+    if (sutra[0] == sutra_code) {
+      return sutra[1] + '(' + sutra[5] + '卷)[' + sutra[7] + ']';
+    }
+  }
+}
+
+function get_hit_html(sutra_code, page_code, text) {
+  var head = '<div class="result-head"><span class="btn-nav prev-page"><</span><span class="title">' + page_code
+      + '</span><span class="btn-nav next-page">></span><img class="btn-img show-pic" src="/static/imgs/icon_pic.png">'
+      + '<img class="btn-img btn-operate"></div>';
+  var name = '<div class="result-name">' + get_sutra_tips(sutra_code) + '</div>';
+  var text = '<div class="result-text slim-scroll">' + text + '</div>';
+  return '<div class="result-item">' + head + name + text + '</div>';
+}
+
+// 上一页检索结果
+
+// 下一页检索结果
+
+// 跳转第n页检索结果
+
+// 上一页
+
+// 下一条检索结果
 
 // 配置自定检索范围
 $('#my-select').multiSelect({

@@ -46,6 +46,7 @@ target/
 log/
 app.yml
 static/upload/avatar/
-data/xml/
-data/meta/
+data/xml/ori/*
+data/meta/juan
+data/meta/mulu
 data/build_log/
