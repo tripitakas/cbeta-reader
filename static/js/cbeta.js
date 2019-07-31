@@ -4,7 +4,8 @@
  * Date: 2019-07-30
  */
 
-<!-- 初始化 -->
+<!-- 页面初始化 -->
+
 // 高度自适应
 function adaptive() {
   var h = $(document.body).height();
@@ -21,7 +22,7 @@ $(window).resize(function () {
 });
 
 
-<!-- 顶部导航第一行 -->
+<!-- 顶部导航 -->
 
 // 显示、隐藏文章区域
 $('.m-header .zone-control .zone-article').click(function () {
@@ -41,25 +42,28 @@ $('.m-header .zone-control .zone-search').click(function () {
   $('.m-header .sub-line .right').toggleClass('hide');
 });
 
+
+<!-- 左侧经文 -->
+
 // 展开更多操作
-$('.more .btn-more').click(function () {
+$('.m-header .more .btn-more').click(function () {
   $('.more-group').toggleClass('hidden');
 });
 
-$('.more .btn-sm').click(function () {
+$('.m-header .more .btn-sm').click(function () {
   $(this).toggleClass('active');
 });
 
-// 显示行首
-$('.more .btn-line-head').click(function () {
+// 显示经文行首
+$('.m-header .more .btn-line-head').click(function () {
   if ($('#content-article').hasClass('article-row'))
     $('#content-article').removeClass('article-row').addClass('article');
   else
     $('#content-article').removeClass('article').addClass('article-row');
 });
 
-// 显示校勘
-$('.more .btn-note').click(function () {
+// 显示经文校勘
+$('.m-header .more .btn-note').click(function () {
   if ($(this).hasClass('active')) {
     $('.content-left .note').hide();
   } else {
@@ -68,43 +72,63 @@ $('.more .btn-note').click(function () {
   }
 });
 
-// 显示标点
-$('.more .btn-bd').click(function () {
+// 显示经文标点
+$('.m-header .more .btn-bd').click(function () {
   if ($(this).hasClass('active'))
     $('.content-left bd').hide();
   else
     $('.content-left bd').show();
 });
 
-$('.sub-line .order-wrap').click(function () {
-  $('.search-orders').toggleClass('hide');
+// 跳转第一卷
+$('.sub-line .left .btn-page.first').click(function () {
+  var n = $('.sub-line .left .btn-page.first').text().toString();
+  var juan = n.length < 3 ? n.padStart(3, "0") : n;
+  window.location = '/' + zang + jing + '_' + juan;
 });
 
-// 选择检索范围
-$('.scope-item').click(function () {
-  $('.scope-item').removeClass('active');
-  $(this).addClass('active');
-  $('#cur-scope').text($(this).text());
+// 跳转最末卷
+$('.sub-line .left .btn-page.last').click(function () {
+  var n = $('.sub-line .left .btn-page.last').text().toString();
+  var juan = n.length < 3 ? n.padStart(3, "0") : n;
+  window.location = '/' + zang + jing + '_' + juan;
 });
 
+// 跳转上一卷
+$('.sub-line .left .btn-page.prev').click(function () {
+  window.location = '/' + zang + jing + '_' + prev;
+});
 
-<!-- 顶部导航第二行 -->
+// 跳转下一卷
+$('.sub-line .left .btn-page.next').click(function () {
+  window.location = '/' + zang + jing + '_' + next;
+});
 
-// 增加字体
+// 跳转第n卷
+$('.sub-line .left .btn-page.to').on("keydown", function (event) {
+  var keyCode = event.keyCode || event.which;
+  if (keyCode == "13") {
+    var n = $('.btn-page.to input').val().trim();
+    var juan = n.length < 3 ? n.padStart(3, "0") : n;
+    window.location = '/' + zang + jing + '_' + juan;
+  }
+});
+
+// 增加经文字体
 $('.sub-line .left .btn-font-enlarge').click(function () {
   var $article = $('.content > .content-left');
   var cur_size = parseFloat($article.css('font-size'));
   $article.css('font-size', cur_size + 1);
 });
 
-// 减少字体
+// 减少经文字体
 $('.sub-line .left .btn-font-reduce').click(function () {
   var $article = $('.content > .content-left');
   var cur_size = parseFloat($article.css('font-size'));
   $article.css('font-size', cur_size - 1);
 });
 
-// 展开、收起顶部导航第二行
+// 展开、收起次导航
 $('.zoom .min-img').click(function () {
   $('.zoom .min-img').toggleClass('hide');
   $('.zoom .max-img').toggleClass('hide');
@@ -119,33 +143,8 @@ $('.zoom .max-img').click(function () {
   $('.main-right .content').css('padding-top', 70);
 });
 
-// 弹框-检索结果排序方式
-$('.order-wrap').on('click', function (event) {
-  event.stopPropagation();
-  var flag = true;
-  var $tag = $('.search-orders');
-  $tag.show();
-  $(document).bind("click", function (e) {
-    var target = $(e.target);
-    if (target.closest($tag).length === 0 && flag === true) {
-      $tag.hide();
-      flag = false;
-    }
-  });
-});
-
-// 选择某种排序方式
-$('.search-order').click(function () {
-  $('.search-order').removeClass('active');
-  $(this).addClass('active');
-  $('#cur-order').text($(this).text());
-});
-
-
-<!-- 左侧文章阅读区域 -->
-
-// 点击关键字，显示弹框
-$('.kw').click(function (e) {
+// 点击经文关键字，显示弹框
+$('#content-article .kw').click(function (e) {
   var $kw_dlg = $('#mouse-over-dlg');
   var positionX = e.pageX;
   var positionY = e.pageY;
@@ -169,7 +168,7 @@ $('.kw').click(function (e) {
   $('#text-selected-dlg').hide();
 });
 
-// 选中文字时，显示弹框
+// 选中经文文字，显示弹框
 $('.main-right .content p').mouseup(function (e) {
   var $txt_dlg = $('#text-selected-dlg');
   var txt = window.getSelection ? window.getSelection() : document.selection.createRange().text; //选中的文本
@@ -202,24 +201,11 @@ $('.main-right .content p').mouseup(function (e) {
 });
 
 
-<!-- 中间粘住结果区域 -->
-// 删除结果
-$('.content-center .result-item .btn-operate').click(function () {
-  $(this).parent().parent().remove();
-});
+<!-- 右侧全文检索 -->
 
+// 全文检索
+$('.m-header #btn-search').click(function () {
 
-<!-- 右侧检索结果区域 -->
-
-// 粘住结果
-$('.content-right .result-item .btn-operate').click(function () {
-  $('.main-right .content .content-center').removeClass('hide');
-  $('.m-header .sub-line .center').removeClass('hide');
-  var item = $(this).parent().parent();
-  item.find('.btn-operate').bind('click', function () {
-    $(this).parent().parent().remove();
-  });
-  $('.content-center .result-items').append(item);
 });
 
 // 配置自定检索范围
@@ -248,6 +234,56 @@ $('#configModal .add-search-scope').click(function () {
   $('#configModal .search-scope-groups').append(scopeStr);
   $('#configModal .search-scope-groups .checkbox-inline:last').focus();
   $('#configModal .checkbox-inline').unbind('dblclick').bind('dblclick', dblClickCheckbox);
+});
+
+// 选择检索范围
+$('.scope-item').click(function () {
+  $('.scope-item').removeClass('active');
+  $(this).addClass('active');
+  $('#cur-scope').text($(this).text());
+});
+
+// 弹框-检索结果排序方式
+$('.sub-line .order-wrap').on('click', function (event) {
+  event.stopPropagation();
+  $('.search-orders').toggleClass('hide');
+  var flag = true;
+  var $tag = $('.search-orders');
+  $tag.show();
+  $(document).bind("click", function (e) {
+    var target = $(e.target);
+    if (target.closest($tag).length === 0 && flag === true) {
+      $tag.hide();
+      flag = false;
+    }
+  });
+});
+
+// 选择某种排序方式
+$('.search-order').click(function () {
+  $('.search-order').removeClass('active');
+  $(this).addClass('active');
+  $('#cur-order').text($(this).text());
+});
+
+
+// 粘住某个检索结果
+$('.content-right .result-item .btn-operate').click(function () {
+  $('.main-right .content .content-center').removeClass('hide');
+  $('.m-header .sub-line .center').removeClass('hide');
+  var item = $(this).parent().parent();
+  item.find('.btn-operate').bind('click', function () {
+    $(this).parent().parent().remove();
+  });
+  $('.content-center .result-items').append(item);
+});
+
+
+<!-- 中间粘住检索结果 -->
+
+// 删除粘住的结果
+$('.content-center .result-item .btn-operate').click(function () {
+  $(this).parent().parent().remove();
 });
 
 
@@ -279,7 +315,7 @@ var language = {
   }
 };
 
-// 经目检索-初始化
+// DataTable-初始化
 $('#my-sutra-table').DataTable({
   language: language,
   data: cbeta_sutras
@@ -302,10 +338,20 @@ $('#my-sutra-table').DataTable().on('draw', function () {
 
 <!-- 目录导航 -->
 
+// 目录导航初始化
+$(document).ready(function () {
+  postApi('/cbeta/mulu', {'data': {'zang': zang, 'jing': jing}}, function (res) {
+    var mulu_info = res.data;
+    $('#my-mulu-tree').jstree({
+      'core': {
+        'data': mulu_info
+      }
+    });
+  });
+});
+
 // 双击目录节点时，打开链接
 $('#my-mulu-tree').bind("dblclick.jstree", function (event) {
   var node = $(event.target).closest("li");
   window.location = '/' + node.attr('title');
 });
-
-
