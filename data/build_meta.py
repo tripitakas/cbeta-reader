@@ -182,12 +182,16 @@ def build_db(index='cb4ocr-ik', bm_path=BM_PATH, mode='create', book_code='', sp
         mapping = {'properties': {
             'normal': {'type': 'text', 'analyzer': 'ik_max_word', 'search_analyzer': 'ik_smart'},
             'origin': {'type': 'text', 'analyzer': 'ik_max_word', 'search_analyzer': 'ik_smart'},
+            'page_code': {'type': 'text', 'fielddata': True},
+            'sutra_code': {'type': 'text', 'fielddata': True},
         }}
         es.indices.put_mapping(index=index, body=mapping)
     elif split == 'jieba':
         mapping = {'properties': {
             'normal': {'type': 'text', 'analyzer': 'jieba_index', 'search_analyzer': 'jieba_index'},
             'origin': {'type': 'text', 'analyzer': 'jieba_index', 'search_analyzer': 'jieba_index'},
+            'page_code': {'type': 'text', 'fielddata': True},
+            'sutra_code': {'type': 'text', 'fielddata': True},
         }}
         es.indices.put_mapping(index=index, body=mapping)
 
