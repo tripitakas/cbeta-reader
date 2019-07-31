@@ -17,7 +17,7 @@ from controller.role import url_placeholder
 from tornado.options import define, options
 from yaml import load as load_yml, SafeLoader
 
-__version__ = '0.0.1.90725-dev'
+__version__ = '0.0.2.900801-dev'
 BASE_DIR = path.dirname(path.dirname(__file__))
 
 define('testing', default=False, help='the testing mode', type=bool)

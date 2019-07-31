@@ -11,6 +11,7 @@ import lxml.etree as etree
 import controller.errors as errors
 from controller.base import BaseHandler
 from controller.cbeta.meta import get_juan, get_juan_info, XML_DIR
+import logging
 
 
 class CbetaHandler(BaseHandler):
@@ -45,15 +46,20 @@ class CbetaHandler(BaseHandler):
             fuzzy_name = '%s*n%s_%03d.xml' % (zang, jing, int(juan))
             xml_file = glob(os.path.join(XML_DIR, 'ori', zang, '**', fuzzy_name))
             if not xml_file:
+                logging.warning('ori/%s not exist' % fuzzy_name)
                 return self.send_error_response(errors.xml_not_found, render=True)
             article = self.get_article(xml_file[0])
+            title = re.search(r'<div class="title">([^<\n]+)</div>', article)
+            title = title or re.search(r'<div class="jhead">([^<\n]+)', article)
+            title = title and title.group(1) or ''
+            logging.info(','.join([title, xml_file[0]]))
 
             index = juan_list.index(juan)
-            prev = juan_list[1 if index < 1 else index - 1]
+            prev = len(juan_list) > 1 and juan_list[1 if index < 1 else index - 1]
             next = juan_list[index + 1 if index < len(juan_list) - 1 else len(juan_list) - 1]
             self.render(
                 'cbreader.html', article=article, code=code, zang=zang, jing=jing, juan=juan,
-                juan_list=juan_list, prev=prev, next=next
+                juan_list=juan_list, prev=prev, next=next, title=title,
             )
 
         except Exception as e:
