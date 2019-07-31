@@ -413,7 +413,23 @@ var language = {
 // DataTable-初始化
 $('#my-sutra-table').DataTable({
   language: language,
-  data: cbeta_sutras
+  data: cbeta_sutras,
+  columnDefs: [
+    {
+      'targets': [0],
+      'data': 'id',
+      'render': function (data, type, full) {
+        return '<a href="/' + full[0] + '">' + full[0] + '</a>'
+      }
+    },
+    {
+      'targets': [1],
+      'data': 'title',
+      'render': function (data, type, full) {
+        return '<a href="/' + full[0] + '">' + full[1] + '</a>'
+      }
+    },
+  ]
 });
 
 function tableBind() {
