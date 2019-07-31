@@ -216,7 +216,7 @@
 }
 
 .m-pager .btn-page.to input {
-    width: 45px;
+    width: 55px;
     height: 20px;
     background: var(--Color_Grey_Lighter);
     border: 0;
@@ -452,6 +452,7 @@
 .result-head .title {
     cursor: pointer;
     margin: 0 5px;
+    font-size: 16px;
 }
 
 .result-item .result-name {

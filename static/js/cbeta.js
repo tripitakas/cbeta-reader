@@ -81,31 +81,31 @@ $('.m-header .more .btn-bd').click(function () {
 });
 
 // 跳转第一卷
-$('.sub-line .left .btn-page.first').click(function () {
-  var n = $('.sub-line .left .btn-page.first').text().toString();
+$('.sub-line .article .btn-page.first').click(function () {
+  var n = $('.sub-line .left .btn-page.first').css('title').toString();
   var juan = n.length < 3 ? n.padStart(3, "0") : n;
   window.location = '/' + zang + jing + '_' + juan;
 });
 
 // 跳转最末卷
-$('.sub-line .left .btn-page.last').click(function () {
-  var n = $('.sub-line .left .btn-page.last').text().toString();
+$('.sub-line .article .btn-page.last').click(function () {
+  var n = $('.sub-line .left .btn-page.last').css('title').toString();
   var juan = n.length < 3 ? n.padStart(3, "0") : n;
   window.location = '/' + zang + jing + '_' + juan;
 });
 
 // 跳转上一卷
-$('.sub-line .left .btn-page.prev').click(function () {
+$('.sub-line .article .btn-page.prev').click(function () {
   window.location = '/' + zang + jing + '_' + prev;
 });
 
 // 跳转下一卷
-$('.sub-line .left .btn-page.next').click(function () {
+$('.sub-line .article .btn-page.next').click(function () {
   window.location = '/' + zang + jing + '_' + next;
 });
 
 // 跳转第n卷
-$('.sub-line .left .btn-page.to').on("keydown", function (event) {
+$('.sub-line .article .btn-page.to').on("keydown", function (event) {
   var keyCode = event.keyCode || event.which;
   if (keyCode == "13") {
     var n = $('.btn-page.to input').val().trim();
@@ -115,14 +115,14 @@ $('.sub-line .left .btn-page.to').on("keydown", function (event) {
 });
 
 // 增加经文字体
-$('.sub-line .left .btn-font-enlarge').click(function () {
+$('.sub-line .article .btn-font-enlarge').click(function () {
   var $article = $('.content > .content-left');
   var cur_size = parseFloat($article.css('font-size'));
   $article.css('font-size', cur_size + 1);
 });
 
 // 减少经文字体
-$('.sub-line .left .btn-font-reduce').click(function () {
+$('.sub-line .article .btn-font-reduce').click(function () {
   var $article = $('.content > .content-left');
   var cur_size = parseFloat($article.css('font-size'));
   $article.css('font-size', cur_size - 1);
@@ -204,22 +204,24 @@ $('.main-right .content p').mouseup(function (e) {
 <!-- 右侧全文检索 -->
 
 var last_query = '';
-
-// 全文检索
-$('.m-header #btn-search').click(function () {
-  var q = $('.m-header #search-input').val().trim();
-  if (q === '') return;
-  postApi('/cbeta/search', {'data': {'q': q}}, function (res) {
+function search(q, page) {
+  if (q === '' || parseInt(page) < 1) return;
+  postApi('/cbeta/search', {'data': {'q': q, 'page': page}}, function (res) {
     var html = '';
     for (var i = 0, len = res.data.hits.length; i < len; i++) {
       var hit = res.data.hits[i];
       html += get_hit_html(hit['sutra_code'], hit['page_code'], hit['normal']);
     }
     $('.content-right .result-items').html(html);
-    $('.m-header .sub-line .right .m-pager .last').css('title', Math.ceil(res.data.total/10));
+    var totalPage = Math.ceil(res.data.total/10);
+    $('.sub-line .search .btn-page.last').attr('title', totalPage);
+    $('.content-right').removeClass('hide');
+    $('.sub-line .right').removeClass('hide');
+    // 设置全局变量
     last_query = q;
+    $('.sub-line .search .btn-page.to input').val(page);
   });
-});
+}
 
 function get_sutra_tips(sutra_code) {
   for (var i = 0, len = cbeta_sutras.length; i < len; i++) {
@@ -239,13 +241,66 @@ function get_hit_html(sutra_code, page_code, text) {
   return '<div class="result-item">' + head + name + text + '</div>';
 }
 
-// 上一页检索结果
+// 全文检索
+$('.m-header #btn-search').click(function () {
+  var q = $('.m-header #search-input').val().trim();
+  search(q, 1);
+});
 
-// 下一页检索结果
+$('.m-header #search-input').on("keydown", function (event) {
+  var keyCode = event.keyCode || event.which;
+  if (keyCode == "13") {
+    var q = $('.m-header #search-input').val().trim();
+    search(q, 1);
+  }
+});
 
-// 跳转第n页检索结果
+// 检索结果-跳转第一页
+$('.sub-line .search .btn-page.first').click(function () {
+  search(last_query, 1);
+});
 
-// 上一页
+// 检索结果-跳转最末页
+$('.sub-line .search .btn-page.last').click(function () {
+  var page = $('.sub-line .search .btn-page.last').attr('title');
+  search(last_query, page);
+});
+
+// 检索结果-跳转上一页
+$('.sub-line .search .btn-page.prev').click(function () {
+  var page = $('.sub-line .search .btn-page.to input').val();
+  search(last_query, parseInt(page)-1);
+});
+
+// 检索结果-跳转下一页
+$('.sub-line .search .btn-page.next').click(function () {
+  var page = $('.sub-line .search .btn-page.to input').val();
+  search(last_query, parseInt(page)+1);
+});
+
+// 检索结果-跳转第n页
+$('.sub-line .search .btn-page.to').on("keydown", function (event) {
+  var keyCode = event.keyCode || event.which;
+  if (keyCode == "13") {
+    var page = $('.sub-line .search .btn-page.to input').val();
+    search(last_query, page);
+  }
+});
+
+// 检索结果-增加字体
+$('.sub-line .search .btn-font-enlarge').click(function () {
+  var $resultItem = $('.content-right .result-item');
+  var cur_size = parseFloat($resultItem.css('font-size'));
+  $resultItem.css('font-size', cur_size + 1);
+});
+
+// 检索结果-减少字体
+$('.sub-line .search .btn-font-reduce').click(function () {
+  var $resultItem = $('.content-right .result-item');
+  var cur_size = parseFloat($resultItem.css('font-size'));
+  $resultItem.css('font-size', cur_size - 1);
+});
+
 
 // 下一条检索结果
 
@@ -306,7 +361,6 @@ $('.search-order').click(function () {
   $(this).addClass('active');
   $('#cur-order').text($(this).text());
 });
-
 
 // 粘住某个检索结果
 $('.content-right .result-item .btn-operate').click(function () {
