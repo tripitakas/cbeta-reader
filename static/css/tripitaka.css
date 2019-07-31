@@ -603,3 +603,16 @@
 .panel-body {
     padding: 0;
 }
+
+.dataTables_paginate .pagination {
+    float: right;
+}
+
+.dataTables_wrapper .paginate_button a:hover {
+    color: #666;
+}
+
+.dataTables_wrapper .paginate_button.active a {
+    background-color: #b88f6f;
+    border-color: #b88f6f;
+}

@@ -222,18 +222,18 @@ $('#my-select').multiSelect({
 
 // 选中、新增检索分组
 function dblClickCheckbox() {
-  $('#configModal .checkbox-inline').removeClass('active');
+  $('#searchConfigModal .checkbox-inline').removeClass('active');
   $(this).addClass('active');
   $('.cur-search-scope').text($(this).text());
 }
 
-$('#configModal .checkbox-inline').bind('dblclick', dblClickCheckbox);
+$('#searchConfigModal .checkbox-inline').bind('dblclick', dblClickCheckbox);
 
-$('#configModal .add-search-scope').click(function () {
+$('#searchConfigModal .add-search-scope').click(function () {
   var scopeStr = "<span class='search-scope'><input type='checkbox'/><label class='checkbox-inline' contenteditable='true'>新建</label></span>";
-  $('#configModal .search-scope-groups').append(scopeStr);
-  $('#configModal .search-scope-groups .checkbox-inline:last').focus();
-  $('#configModal .checkbox-inline').unbind('dblclick').bind('dblclick', dblClickCheckbox);
+  $('#searchConfigModal .search-scope-groups').append(scopeStr);
+  $('#searchConfigModal .search-scope-groups .checkbox-inline:last').focus();
+  $('#searchConfigModal .checkbox-inline').unbind('dblclick').bind('dblclick', dblClickCheckbox);
 });
 
 // 选择检索范围

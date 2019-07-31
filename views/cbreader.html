@@ -3,34 +3,28 @@
 
 <head>
   <title>CBETA</title>
-  {% include _base_meta.html %}
-  {% include _base_css.html %}
-  <link rel="stylesheet" href="{{ static_url('assets/modal-effect/css/component.css') }}">
-  <link rel="stylesheet" href="{{ static_url('css/tripitaka.css') }}"/>
+  <meta charset="UTF-8">
+  <meta name="MobileOptimized" content="320"/>
+  <meta name="HandheldFriendly" content="True"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="description" content="{{site['description']}}"/>
+  <meta name="keywords" content="{{site['keywords']}}"/>
+  <link rel="shortcut icon" href="{{ static_url('imgs/favicon.ico') }}" type="image/x-icon"/>
+  <link rel="stylesheet" href="{{ static_url('css/bootstrap.min.css') }}"/>
+  <link rel="stylesheet" href="{{ static_url('assets/sweet-alert/sweet-alert.min.css') }}"/>
   <link rel="stylesheet" href="{{ static_url('assets/jquery-multi-select/multi-select.css') }}"/>
   <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap.min.css"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css"/>
+  <link rel="stylesheet" href="{{ static_url('css/style.css') }}"/>
+  <link rel="stylesheet" href="{{ static_url('css/base.css') }}"/>
+  <link rel="stylesheet" href="{{ static_url('css/tripitaka.css') }}"/>
+  <script src="{{ static_url('plugins/jquery.min.js') }}"></script>
   <!--[if lt IE 9]>
   <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
   <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
   <![endif]-->
 </head>
-
-<style>
-  .dataTables_paginate .pagination {
-    float: right;
-  }
-
-  .dataTables_wrapper .paginate_button a:hover {
-    color: #666;
-  }
-
-  .dataTables_wrapper .paginate_button.active a {
-    background-color: #b88f6f;
-    border-color: #b88f6f;
-  }
-
-</style>
 
 <script>
   // 初始化全局变量
@@ -45,13 +39,13 @@
 <div class="app-main">
   <div class="main">
     <div class="main-content flex-content">
-      <!--<div class="main-left slim-scroll" id="main-left"></div>-->
       <div class="main-right" id="main-right">
+        <!-- 顶部导航 -->
         <div class="m-header">
           <div class="header-line main-line">
             <div class="left">
               <div class="panel-btn">
-                <img class="btn-img" data-toggle="modal" data-target="#searchModal" src="{{ static_url('imgs/icon_panel.png') }}"/>
+                <img class="btn-img" data-toggle="modal" data-target="#sutraNavModal" src="{{ static_url('imgs/icon_panel.png') }}"/>
               </div>
               <div class="title">CBETA</div>
               <div class="zone-control">
@@ -74,7 +68,7 @@
             <div class="right">
               <div class="search">
                 <img class="search-help btn-img" src="{{ static_url('imgs/char_icon7.png') }}" title="全文检索帮助"/>
-                <img src="{{ static_url('imgs/icon_config.png') }}" class="btn-img btn-config" title="配置自定范围" data-toggle="modal" data-target="#configModal"/>
+                <img src="{{ static_url('imgs/icon_config.png') }}" class="btn-img btn-config" title="配置自定范围" data-toggle="modal" data-target="#searchConfigModal"/>
                 <div class="input-group-btn search-scope">
                   <button type="button" class="btn dropdown-toggle btn-scope" data-toggle="dropdown">
                     <span class="cur-scope" id="cur-scope">全部</span><span class="caret"></span>
@@ -86,7 +80,7 @@
                   </ul>
                 </div><!-- /btn-group -->
                 <input id="search-input" class="form-control search-input" type="text" placeholder="请输入关键字或页码">
-                <img id="btn-search" class="search-img"  src="/static/imgs/search-icon.png">
+                <img id="btn-search" class="search-img" src="/static/imgs/search-icon.png">
               </div>
               <div class="zoom">
                 <img class="min-img" src="{{ static_url('imgs/icon_up.png') }}"/>
@@ -139,12 +133,13 @@
         </div>
 
         <div class="content">
+          <!-- 左侧经文阅读区域 -->
           <div class="content-left slim-scroll">
             <div id="content-article" class="article">
               {% raw article %}
             </div>
           </div>
-
+          <!-- 中间粘住检索结果区域 -->
           <div class="content-center slim-scroll hide">
             <div class="result-items">
               <div class="result-item">
@@ -162,7 +157,7 @@
               </div>
             </div>
           </div>
-
+          <!-- 右侧全文检索结果区域 -->
           <div class="content-right slim-scroll">
             <div class="result-items">
               <div class="result-item">
@@ -228,19 +223,19 @@
 </div>
 </div>
 
-<!--鼠标点击关键字时，弹出对话框-->
+<!-- 鼠标点击关键字弹出对话框 -->
 <div id="mouse-over-dlg">
-  <div class="dlg_txt"><b>得【大正】＝保</b></div>
+  <div class="dlg-txt"><b>得【大正】＝保</b></div>
   <div class="m-btn-group">
     <div class="m-btn"><a href=""><i class="ion-ios7-copy-outline"></i>复制</a></div>
-    <div class="m-btn"><a href="javascript:showList()"><i class="ion-navicon"></i>查看列图</a></div>
+    <div class="m-btn"><a href=""><i class="ion-navicon"></i>查看列图</a></div>
   </div>
 </div>
 
-<!--鼠标选中文字时，弹出对话框-->
+<!-- 鼠标选中文字弹出对话框 -->
 <div id="text-selected-dlg">
   <ul>
-    <li><img src="{{ static_url('imgs/icon9_1.png') }}"/><span>复制文字</span></li>
+    <li><img src="{{ static_url('imgs/icon9.png') }}"/><span>复制文字</span></li>
     <li><img src="{{ static_url('imgs/icon10.png') }}"/><span>引用复制</span></li>
     <li><img src="{{ static_url('imgs/icon11.png') }}"/><span>查词典</span></li>
     <li><img src="{{ static_url('imgs/icon12.png') }}"/><span>查字典</span></li>
@@ -250,7 +245,7 @@
 
 <!-- 配置自定检索范围 -->
 <div class="panel-body">
-  <div id="configModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="choose-pages" aria-hidden="true">
+  <div id="searchConfigModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="choose-pages" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -289,9 +284,9 @@
   </div>
 </div>
 
-<!-- 检索经名、作译者等 -->
+<!-- 根据字段检索经名 -->
 <div class="panel-body">
-  <div id="searchModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="choose-pages" aria-hidden="true">
+  <div id="sutraNavModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="choose-pages" aria-hidden="true">
     <div class="modal-dialog" style="width: 80%">
       <div class="modal-content">
         <div class="modal-header">
@@ -324,7 +319,7 @@
   </div>
 </div>
 
-<!-- 目录导航 -->
+<!-- 经文内部目次导航 -->
 <div class="panel-body">
   <div id="muluModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mulu" aria-hidden="true">
     <div class="modal-dialog" style="width: 80%">
@@ -342,13 +337,18 @@
   </div>
 </div>
 
-{% include _base_js.html %}
+{% raw xsrf_form_html() %}
+<script src="{{ static_url('js/bootstrap.min.js') }}"></script>
+<script src="{{ static_url('assets/sweet-alert/sweet-alert.min.js') }}"></script>
+<script src="{{ static_url('js/backend.js') }}"></script>
 <script type="text/javascript" src="{{ static_url('assets/jquery-multi-select/jquery.multi-select.js') }}"></script>
 <script type="text/javascript" src="{{ static_url('assets/jquery-multi-select/jquery.quicksearch.js') }}"></script>
-<script type="text/javascript" src="{{ static_url('js/cbeta-sutra.js') }}"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/v/bs/dt-1.10.18/datatables.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+<script type="text/javascript" src="{{ static_url('js/cbeta-sutra.js') }}"></script>
 <script type="text/javascript" src="{{ static_url('js/cbeta.js') }}"></script>
 
+
 </body>
+
 </html>
