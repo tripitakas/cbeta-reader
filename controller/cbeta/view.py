@@ -14,12 +14,12 @@ from controller.cbeta.meta import get_juan, get_juan_info, XML_DIR
 
 
 class CbetaHandler(BaseHandler):
-    URL = '/@code'
+    URL = ['/@code',  '/']
 
     re_logic = re.compile(r'^([A-Z]{1,2})([A-Z]?\d+[A-Za-z]?)(_(\d+))?$')
     re_physical = re.compile(r'^([A-Z]{1,2})(\d+)n([A-Z]?\d+[A-Za-z]?)_p([a-z]?\d+)([abc]\d+)?$')
 
-    def get(self, code=''):
+    def get(self, code='T0001_001'):
         """ CBETA阅读和搜索
         :param code编号：可以是经卷编号（逻辑编号），如T1579（大正藏第1579部经，即《瑜伽師地論》），或T1579_001（《瑜伽師地論》第一卷）；
             也可以是页编码或行编号（物理编号），如T30n1579_p0279、T30n1579_p0279a08（大正藏第30册第1579部经279页第a栏第8行） """
