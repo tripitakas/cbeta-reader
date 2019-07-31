@@ -18,52 +18,76 @@ def can_search():
     return hosts[0].get('host')
 
 
-def find(q, index='cb4ocr-ik'):
-    """ 从ES中寻找与q最匹配的document """
+def pre_filter(q):
+    q = normalize(q)
+    q = re.sub(r'[\x00-\xff]', '', q)
+    q = re.sub(Diff.junk_cmp_str, '', q)
+    return q
+
+
+def format_hits(hits, shrink=True):
+    """ 格式化检索结果
+    :param shrink 是否缩起来 """
+
+    def merge_kw(txt):
+        # 将<kw>一</kw>，<kw>二</kw>格式替换为<kw>一，二</kw>
+        regex = r'[，、：；。？！“”‘’「」『』（）%&*◎—……]+'
+        txt = re.sub('</kw>(%s)<kw>' % regex, lambda r: r.group(1), txt)
+        # 合并相邻的关键字
+        txt = re.sub('</kw><kw>', '', txt)
+        return txt
+
+    def shrink(txt):
+        """ 将检索结果缩起来，以便前端显示 """
+        s, e = txt.find('<kw>'), txt.rfind('</kw>')
+        return '<div class="shrink">%s</div>%s<div class="shrink">%s</div>' % (txt[:s], txt[s:e + 5], txt[e + 5:])
+
+    for i, hit in enumerate(hits):
+        highlights = {re.sub('</?kw>', '', v): merge_kw(v) for v in hit['highlight']['normal']}
+        normal = [highlights.get(r, r) for r in hit['_source']['normal']]
+        normal = ''.join(normal)
+        hits[i] = {
+            'score': hit['_score'],
+            'page_code': hit['_source'].get('page_code'),
+            'sutra_code': hit['_source'].get('sutra_code'),
+            'normal': shrink(normal) if shrink else normal,
+        }
+
+    return hits
+
+
+def search(q, field='normal', page=1, sort='score', filter_sutra_codes=None, index='cb4ocr-ik'):
+    """ 从ES中寻找与q最匹配的document
+    :param field 查询哪个字段，normal表示规范文本字段，page_code表示页码
+    :param page 第几页
+    :param sort 排序方式，score表示相似度，page_code表示页码
+    :param filter_sutra_codes 查询经号的范围
+    :param index 查询哪个索引
+    """
     if not q or not can_search():
         return []
 
-    if re.match(r'^[0-9a-zA-Z_]+', q):
-        match = {'page_code': q}
-    else:
-        ocr = re.sub(r'[\x00-\xff]', '', q)
-        ocr = re.sub(Diff.junk_cmp_str, '', ocr)
-        match = {'normal': normalize(ocr)}
-
+    q = pre_filter(q) if field == 'normal' else q
+    sort = [{'page_code': 'asc'}, '_score'] if sort == 'page_code' else ['_score', {'page_code': 'asc'}]
+    highlight = {'pre_tags': ['<kw>'], 'post_tags': ['</kw>'], 'fields': {'normal': {}}}
     dsl = {
-        'query': {'match': match},
-        'highlight': {'pre_tags': ['<kw>'], 'post_tags': ['</kw>'], 'fields': {'normal': {}}}
+        'size': 10,
+        'from': 10 * (int(page) - 1),
+        'sort': sort,
+        'highlight': highlight,
+        'query': {
+            'bool': {
+                'must': {
+                    'match': {field: q}
+                }
+            }
+        },
     }
+    if filter_sutra_codes:
+        dsl['query']['bool']['filter'] = [{'terms': {'sutra_code': filter_sutra_codes}}]
 
     es = Elasticsearch(hosts=get_hosts())
     r = es.search(index=index, body=dsl)
-
-    return r['hits']['hits']
-
-
-def find_one(ocr, num=1):
-    """ 从ES中寻找与ocr最匹配的document，返回第num个结果 """
-    ret = find(ocr)
-    if not ret or num - 1 not in range(0, len(ret)):
-        return '', []
-    hit_page_codes = [r['_source']['page_code'] for r in ret]
-    cb = ''.join(ret[num - 1]['_source']['origin'])
-    diff = Diff.diff(ocr, cb, label=dict(base='ocr', cmp1='cb'))[0]
-    txt = ''.join(['<kw>%s</kw>' % d['cb'] if d.get('is_same') else d['cb'] for d in diff])
-
-    return txt, hit_page_codes
-
-
-def find_neighbor(page_code, neighbor='next'):
-    """ 从ES中寻找page_code的前一页或后一页记录 """
-    assert neighbor in ['prev', 'next']
-    head = re.search(r'^([A-Z]{1,2}\d+n[A-Z]?\d+[A-Za-z_]?)p([a-z]?\d+)', page_code)
-    page_no = head.group(2)
-    neighbor_no = str(int(page_no) + 1 if neighbor == 'next' else int(page_no) - 1).zfill(len(page_no))
-    neighbor_code = '%sp%s' % (head.group(1), neighbor_no)
-    neighbor_node = find(neighbor_code)
-    return neighbor_node and neighbor_node[0]
-
-
-if __name__ == '__main__':
-    print([r['_source'] for r in find('由業非以自性滅，故無賴耶亦能生', None)])
+    hits, total = r['hits']['hits'], r['hits']['total']['value']
+    hits = format_hits(hits)
+    return hits, total

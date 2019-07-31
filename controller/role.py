@@ -31,8 +31,11 @@ role_maps = {
         'routes': {
             '/': ['GET'],
             '/@code': ['GET'],
-            '/api/mulu': ['POST'],
             '/help': ['GET'],
+            '/api/cbeta/mulu': ['POST'],
+            '/api/cbeta/search': ['POST'],
+            '/api/cbeta/prev_page': ['POST'],
+            '/api/cbeta/next_page': ['POST'],
             '/user/(login|register)': ['GET'],
             '/api/user/(login|logout|register)': ['POST'],
         }

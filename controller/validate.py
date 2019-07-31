@@ -43,10 +43,7 @@ def i18n_trans(key):
         'gender': '性别',
         'priority': '优先级',
         'task_type': '任务类型',
-        'pages': '页码',
-        'pages_file': '页码文件',
-
-
+        'page': '页码',
     }
     return maps[key] if key in maps else key
 
@@ -160,6 +157,15 @@ def is_jing(**kw):
     regex = r'^[0-9a-z]+$'
     if v and not re.match(regex, str(v)):  # 值为空或空串时跳过而不检查
         return {k: e.invalid_jing}
+
+
+def is_digit(**kw):
+    """ 检查是否为数字。"""
+    assert len(kw) == 1
+    k, v = list(kw.items())[0]
+    regex = r'^\d+$'
+    if v and not re.match(regex, str(v)):  # 值为空或空串时跳过而不检查
+        return {k: e.not_digit % i18n_trans(k)}
 
 
 def between(min_v, max_v, **kw):

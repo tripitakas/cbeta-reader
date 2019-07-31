@@ -5,5 +5,5 @@ views = [
 ]
 
 handlers = [
-    api.getMuluApi
+    api.GetMuluApi, api.SearchApi, api.PrevPageApi, api.NextPageApi
 ]

@@ -3,15 +3,16 @@
 """
 @time: 2019/07/30
 """
-
+import re
 from controller import errors
 import controller.validate as v
+from controller.cbeta.esearch import search
 from controller.base import BaseHandler, DbError
 from controller.cbeta.meta import get_mulu_info
 
 
-class getMuluApi(BaseHandler):
-    URL = '/api/mulu'
+class GetMuluApi(BaseHandler):
+    URL = '/api/cbeta/mulu'
 
     def post(self):
         """ 获取目录信息"""
@@ -34,3 +35,90 @@ class getMuluApi(BaseHandler):
 
         except DbError as e:
             return self.send_db_error(e)
+
+
+class SearchApi(BaseHandler):
+    URL = '/api/cbeta/search'
+
+    def post(self):
+        """ 全文检索 """
+        try:
+            data = self.get_request_data()
+            rules = [
+                (v.not_empty, 'q'),
+                (v.is_digit, 'page'),
+            ]
+            err = v.validate(data, rules)
+            if err:
+                return self.send_error_response(err)
+
+            m = re.match(r'^([A-Z]{1,2}\d+?n[A-Z]?\d+[A-Za-z]?)_p([a-z]?\d+)$', data['q'])
+            field = 'page_code' if m else 'normal'
+            page = int(data.get('page', 1))
+            sort = data.get('sort', 'score')
+            filter_sutra_codes = data.get('filter_sutra_codes')
+            hits, total = search(data['q'], field=field, page=page, sort=sort, filter_sutra_codes=filter_sutra_codes)
+            self.send_data_response({'hits': hits, 'total': total})
+
+        except DbError as e:
+            return self.send_db_error(e)
+        except Exception as e:
+            return self.send_error_response(e)
+
+
+class PrevPageApi(BaseHandler):
+    URL = '/api/cbeta/prev_page'
+
+    def post(self):
+        """ 上一页 """
+        try:
+            data = self.get_request_data()
+            rules = [(v.not_empty, 'cur_page_code')]
+            err = v.validate(data, rules)
+            if err:
+                return self.send_error_response(err)
+
+            cur_page_code = data['cur_page_code']
+            head = re.search(r'^([A-Z]{1,2}\d+?n[A-Z]?\d+[A-Za-z]?)_p([a-z]?\d+)', cur_page_code)
+            cur_page_no = head.group(2)
+            prev_page_no = str(int(cur_page_no) - 1).zfill(len(cur_page_no))
+            prev_page_code = '%sp%s' % (head.group(1), prev_page_no)
+            r, total = search(prev_page_code, field='page_code')
+            if total == 0:
+                return self.send_error_response(errors.no_result)
+
+            self.send_data_response(r)
+
+        except DbError as e:
+            return self.send_db_error(e)
+        except Exception as e:
+            return self.send_error_response(e)
+
+
+class NextPageApi(BaseHandler):
+    URL = '/api/cbeta/next_page'
+
+    def post(self):
+        """ 下一页 """
+        try:
+            data = self.get_request_data()
+            rules = [(v.not_empty, 'cur_page_code')]
+            err = v.validate(data, rules)
+            if err:
+                return self.send_error_response(err)
+
+            cur_page_code = data['cur_page_code']
+            head = re.search(r'^([A-Z]{1,2}\d+?n[A-Z]?\d+[A-Za-z]?)_p([a-z]?\d+)', cur_page_code)
+            cur_page_no = head.group(2)
+            prev_page_no = str(int(cur_page_no) + 1).zfill(len(cur_page_no))
+            prev_page_code = '%sp%s' % (head.group(1), prev_page_no)
+            r, total = search(prev_page_code, field='page_code')
+            if total == 0:
+                return self.send_error_response(errors.no_result)
+
+            self.send_data_response(r)
+
+        except DbError as e:
+            return self.send_db_error(e)
+        except Exception as e:
+            return self.send_error_response(e)
