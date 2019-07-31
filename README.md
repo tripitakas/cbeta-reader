@@ -7,15 +7,22 @@
 
 ## 安装
 
-本平台需要 Python 3.6+，MongoDB 和 ES 可用远程数据库。
+本平台需要 Python 3.6+，可安装 MongoDB 4.0.4 和 ES 7.20，或使用远程数据库。
+
+如需指定数据库服务器，可运行`main.py`后在生成的`app.yml`中修改`host`等连接配置项，然后再重新运行`main.py`。
+
+```
+pip3 install requirements.txt
+sh data/get_meta.sh
+```
 
 ## 测试
 
 本项目可采用测试驱动开发(TDD)模式实现后端接口和前端控制器类：
 
 ```
-pip install -r tests/requirements.txt
-python3 tests/add_pages.py --db_name=cbreader_test --reset=1
+pip3 install -r tests/requirements.txt
+sh data/get_meta.sh
 python3 run_tests.py 或选中测试用例文件调试
 ```
 
