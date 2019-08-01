@@ -10,7 +10,7 @@ from controller.cbeta.esearch import search
 from controller.base import BaseHandler, DbError
 from controller.cbeta.meta import get_mulu_info
 from controller.cbeta.define import canon_maps
-
+from controller.cbeta.base import CbetaBaseHandler
 
 class GetMuluApi(BaseHandler):
     URL = '/api/cbeta/mulu'
@@ -157,6 +157,27 @@ class getImgUrlApi(BaseHandler):
                 img_url = self.get_img(img_code, suffix)
 
             self.send_data_response({'img_url': img_url})
+
+        except DbError as e:
+            return self.send_db_error(e)
+
+
+class getSutraApi(CbetaBaseHandler):
+    URL = '/api/cbeta/sutra'
+
+    def post(self):
+        """ 根据page_code获取经文内容 """
+        try:
+            data = self.get_request_data()
+            rules = [
+                (v.not_empty, 'page_code'),
+            ]
+            err = v.validate(data, rules)
+            if err:
+                return self.send_error_response(err)
+
+            content_args = self.get_sutra_content(data['page_code'])
+            self.send_data_response(content_args)
 
         except DbError as e:
             return self.send_db_error(e)

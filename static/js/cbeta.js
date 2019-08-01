@@ -4,58 +4,143 @@
  * Date: 2019-07-30
  */
 
-<!-- 页面初始化 -->
+//------------------全局变量及函数---------------
+
+var mulu_info = '';
+
+function view_sutra(page_code, clear_mulu) {
+  postApi('/cbeta/sutra', {'data': {'page_code': page_code.trim()}}, function (res) {
+    // 设置经文内容
+    $('#content-article').html(res.content);
+    // 设置全局变量
+    zang = res.zang;
+    jing = res.jing;
+    juan = res.juan;
+    prev = res.prev;
+    next = res.next;
+    // 设置经文卷导航
+    var first = res.juan_list[0];
+    var last = res.juan_list[res.juan_list.length - 1];
+    $('.sub-line .article .btn-page.first').attr('title', first);
+    $('.sub-line .article .btn-page.last').attr('title', last);
+    $('.sub-line .article .btn-page.prev').attr('title', prev);
+    $('.sub-line .article .btn-page.next').attr('title', next);
+    $('.sub-line .article .btn-page.to input').val(juan);
+    $('.sub-line .article .total').text(last);
+    // 清空目录信息
+    if (clear_mulu === undefined || clear_mulu)
+      mulu_info = '';
+
+    hide_dlg();
+  });
+}
+
+var last_query = '';
+
+function search(q, page) {
+  if (q === '' || parseInt(page) < 1) return;
+  postApi('/cbeta/search', {'data': {'q': q, 'page': page}}, function (res) {
+    var html = '';
+    for (var i = 0, len = res.data.hits.length; i < len; i++) {
+      var hit = res.data.hits[i];
+      html += get_hit_html(hit['sutra_code'], hit['page_code'], hit['normal']);
+    }
+    $('.content-right .result-items').html(html);
+    var totalPage = Math.ceil(res.data.total / 10);
+    $('.sub-line .search .btn-page.last').attr('title', totalPage);
+    $('.sub-line .search .btn-page.to input').val(page);
+    $('.content-right').removeClass('hide');
+    $('.sub-line .right').removeClass('hide');
+    // 设置全局变量
+    last_query = q;
+  });
+}
+
+function _get_sutra_maps() {
+  var sutra_maps = [];
+  for (var i = 0, len = cbeta_sutras.length; i < len; i++) {
+    sutra_maps[cbeta_sutras[i][0]] = cbeta_sutras[i];
+  }
+  return sutra_maps;
+}
+
+var sutra_maps = _get_sutra_maps();
+
+function _get_sutra_tips(sutra_code) {
+  var sutra = sutra_maps[sutra_code];
+  if (sutra !== undefined)
+    return sutra[1] + '(' + sutra[5] + '卷)[' + sutra[7] + ']';
+}
+
+function get_hit_html(sutra_code, page_code, text) {
+  var head = '<div class="result-head"><span class="btn-nav prev-page"><</span><span class="title">' + page_code
+      + '</span><span class="btn-nav next-page">></span><img class="btn-img btn-show-pic" src="/static/imgs/icon_pic.png">'
+      + '<img class="btn-img btn-stick"></div>';
+  var name = '<div class="result-name">' + _get_sutra_tips(sutra_code) + '</div>';
+  var text = '<div class="result-text slim-scroll">' + text + '</div>';
+  return '<div class="result-item">' + head + name + text + '</div>';
+}
+
+function hide_dlg() {
+  $('#text-selected-dlg').hide();
+  $('#note-click-dlg').hide();
+}
+
+function pad(num, len) {
+  return num.length < len ? num.padStart(len, "0") : num;
+}
+
+//------------------页面初始化------------------
 
 // 高度自适应
-function adaptive() {
+$(document).ready(function () {
   var h = $(document.body).height();
   $('#main-left').height(h);
   $('#main-right').height(h);
-}
-
-$(document).ready(function () {
-  adaptive();
 });
 
 $(window).resize(function () {
-  adaptive();
+  var h = $(document.body).height();
+  $('#main-left').height(h);
+  $('#main-right').height(h);
 });
 
-
-<!-- 顶部导航 -->
+//------------------顶部导航--------------------
 
 // 显示、隐藏文章区域
 $('.m-header .zone-control .zone-article').click(function () {
   $('.main-right .content .content-left').toggleClass('hide');
   $('.m-header .sub-line .left').toggleClass('hide');
+  hide_dlg();
 });
 
 // 显示、隐藏中间区域
 $('.m-header .zone-control .zone-stick').click(function () {
   $('.main-right .content .content-center').toggleClass('hide');
   $('.m-header .sub-line .center').toggleClass('hide');
+  hide_dlg();
 });
 
 // 显示、隐藏检索区域
 $('.m-header .zone-control .zone-search').click(function () {
   $('.main-right .content .content-right').toggleClass('hide');
   $('.m-header .sub-line .right').toggleClass('hide');
+  hide_dlg();
 });
 
-
-<!-- 左侧经文 -->
+//------------------左侧经文--------------------
 
 // 展开更多操作
-$('.m-header .more .btn-more').click(function () {
+$('.sub-line .more .btn-more').click(function () {
   $('.more-group').toggleClass('hidden');
 });
 
-$('.m-header .more .btn-sm').click(function () {
+$('.sub-line .more .btn-sm').click(function () {
   $(this).toggleClass('active');
 });
 
 // 显示经文行首
-$('.m-header .more .btn-line-head').click(function () {
+$('.sub-line .more .btn-line-head').click(function () {
   if ($('#content-article').hasClass('article-row'))
     $('#content-article').removeClass('article-row').addClass('article');
   else
@@ -63,7 +148,7 @@ $('.m-header .more .btn-line-head').click(function () {
 });
 
 // 显示经文校勘
-$('.m-header .more .btn-note').click(function () {
+$('.sub-line .more .btn-note').click(function () {
   if ($(this).hasClass('active')) {
     $('.content-left .note').hide();
   } else {
@@ -73,7 +158,7 @@ $('.m-header .more .btn-note').click(function () {
 });
 
 // 显示经文标点
-$('.m-header .more .btn-bd').click(function () {
+$('.sub-line .more .btn-bd').click(function () {
   if ($(this).hasClass('active'))
     $('.content-left bd').hide();
   else
@@ -82,26 +167,28 @@ $('.m-header .more .btn-bd').click(function () {
 
 // 跳转第一卷
 $('.sub-line .article .btn-page.first').click(function () {
-  var n = $('.sub-line .left .btn-page.first').css('title').toString();
-  var juan = n.length < 3 ? n.padStart(3, "0") : n;
-  window.location = '/' + zang + jing + '_' + juan;
+  var n = $('.sub-line .left .btn-page.first').attr('title').toString();
+  var page_code = zang + pad(jing, 4) + '_' + pad(n, 3);
+  view_sutra(page_code, false);
 });
 
 // 跳转最末卷
 $('.sub-line .article .btn-page.last').click(function () {
-  var n = $('.sub-line .left .btn-page.last').css('title').toString();
-  var juan = n.length < 3 ? n.padStart(3, "0") : n;
-  window.location = '/' + zang + jing + '_' + juan;
+  var n = $('.sub-line .left .btn-page.last').attr('title').toString();
+  var page_code = zang + pad(jing, 4) + '_' + pad(n, 3);
+  view_sutra(page_code, false);
 });
 
 // 跳转上一卷
 $('.sub-line .article .btn-page.prev').click(function () {
-  window.location = '/' + zang + jing + '_' + prev;
+  var page_code = zang + pad(jing, 4) + '_' + pad(prev, 3);
+  view_sutra(page_code, false);
 });
 
 // 跳转下一卷
 $('.sub-line .article .btn-page.next').click(function () {
-  window.location = '/' + zang + jing + '_' + next;
+  var page_code = zang + pad(jing, 4) + '_' + pad(next, 3);
+  view_sutra(page_code, false);
 });
 
 // 跳转第n卷
@@ -109,8 +196,8 @@ $('.sub-line .article .btn-page.to').on("keydown", function (event) {
   var keyCode = event.keyCode || event.which;
   if (keyCode == "13") {
     var n = $('.btn-page.to input').val().trim();
-    var juan = n.length < 3 ? n.padStart(3, "0") : n;
-    window.location = '/' + zang + jing + '_' + juan;
+    var page_code = zang + pad(jing, 4) + '_' + pad(n, 3);
+    view_sutra(page_code, false);
   }
 });
 
@@ -128,7 +215,7 @@ $('.sub-line .article .btn-font-reduce').click(function () {
   $article.css('font-size', cur_size - 1);
 });
 
-// 展开、收起次导航
+// 收起第二行导航
 $('.zoom .min-img').click(function () {
   $('.zoom .min-img').toggleClass('hide');
   $('.zoom .max-img').toggleClass('hide');
@@ -136,6 +223,7 @@ $('.zoom .min-img').click(function () {
   $('.main-right .content').css('padding-top', 40);
 });
 
+// 展开第二行导航
 $('.zoom .max-img').click(function () {
   $('.zoom .min-img').toggleClass('hide');
   $('.zoom .max-img').toggleClass('hide');
@@ -143,33 +231,36 @@ $('.zoom .max-img').click(function () {
   $('.main-right .content').css('padding-top', 70);
 });
 
-// 点击经文关键字，显示弹框
-$('#content-article .kw').click(function (e) {
-  var $kw_dlg = $('#mouse-over-dlg');
+
+// 点击经文校勘记，显示弹框
+$('#content-article .note').click(function (e) {
+  var $note_dlg = $('#note-click-dlg');
   var positionX = e.pageX;
   var positionY = e.pageY;
   var height = window.screen.availHeight;
   var width = $('.main-right .content-left').width();
   var left_distance = $('.main-right .content-left').offset().left;
   var screenY = e.screenY;
-  var dlg_width = $kw_dlg.width();
-  var dlg_height = $kw_dlg.height();
+  var dlg_width = $note_dlg.width();
+  var dlg_height = $note_dlg.height();
   if (positionX + dlg_width > width + left_distance) {
-    $kw_dlg.css('left', positionX - dlg_width - 30);
+    $note_dlg.css('left', positionX - dlg_width - 30);
   } else {
-    $kw_dlg.css('left', positionX);
+    $note_dlg.css('left', positionX);
   }
   if (screenY + dlg_height > height) {
-    $kw_dlg.css('top', positionY - dlg_height - 30);
+    $note_dlg.css('top', positionY - dlg_height - 30);
   } else {
-    $kw_dlg.css('top', positionY + 10);
+    $note_dlg.css('top', positionY + 10);
   }
-  $kw_dlg.show();
+  $note_dlg.find('.title').text($(this).attr('data-title'));
+  $note_dlg.find('.content').text($(this).attr('data-content'));
+  $note_dlg.show();
   $('#text-selected-dlg').hide();
 });
 
 // 选中经文文字，显示弹框
-$('.main-right .content p').mouseup(function (e) {
+$('.main-content .content-left').mouseup(function (e) {
   var $txt_dlg = $('#text-selected-dlg');
   var txt = window.getSelection ? window.getSelection() : document.selection.createRange().text; //选中的文本
   if (txt.toString().length > 0) {
@@ -192,62 +283,15 @@ $('.main-right .content p').mouseup(function (e) {
       $txt_dlg.css('top', positionY + 10);
     }
     $txt_dlg.show();
-    $('#mouse-over-dlg').hide();
+    $('#note-click-dlg').hide();
   } else {
     //点击空白处，取消弹框
     $('#text-selected-dlg').hide();
-    $('#mouse-over-dlg').hide();
+    $('#note-click-dlg').hide();
   }
 });
 
-
-<!-- 右侧全文检索 -->
-
-var last_query = '';
-function search(q, page) {
-  if (q === '' || parseInt(page) < 1) return;
-  postApi('/cbeta/search', {'data': {'q': q, 'page': page}}, function (res) {
-    var html = '';
-    for (var i = 0, len = res.data.hits.length; i < len; i++) {
-      var hit = res.data.hits[i];
-      html += get_hit_html(hit['sutra_code'], hit['page_code'], hit['normal']);
-    }
-    $('.content-right .result-items').html(html);
-    var totalPage = Math.ceil(res.data.total/10);
-    $('.sub-line .search .btn-page.last').attr('title', totalPage);
-    $('.sub-line .search .btn-page.to input').val(page);
-    $('.content-right').removeClass('hide');
-    $('.sub-line .right').removeClass('hide');
-    // 设置全局变量
-    last_query = q;
-  });
-}
-
-function get_sutra_maps() {
-  var sutra_maps = [];
-  for (var i = 0, len = cbeta_sutras.length; i < len; i++) {
-    sutra_maps[cbeta_sutras[i][0]] = cbeta_sutras[i];
-  }
-  return sutra_maps;
-}
-
-// 全局变量
-var sutra_maps = get_sutra_maps();
-
-function get_sutra_tips(sutra_code) {
-  var sutra = sutra_maps[sutra_code];
-  if (sutra != undefined)
-    return sutra[1] + '(' + sutra[5] + '卷)[' + sutra[7] + ']';
-}
-
-function get_hit_html(sutra_code, page_code, text) {
-  var head = '<div class="result-head"><span class="btn-nav prev-page"><</span><span class="title">' + page_code
-      + '</span><span class="btn-nav next-page">></span><img class="btn-img btn-show-pic" src="/static/imgs/icon_pic.png">'
-      + '<img class="btn-img btn-stick"></div>';
-  var name = '<div class="result-name">' + get_sutra_tips(sutra_code) + '</div>';
-  var text = '<div class="result-text slim-scroll">' + text + '</div>';
-  return '<div class="result-item">' + head + name + text + '</div>';
-}
+//------------------右侧全文检索-----------------
 
 // 全文检索
 $('.m-header #btn-search').click(function () {
@@ -277,13 +321,13 @@ $('.sub-line .search .btn-page.last').click(function () {
 // 检索结果集-跳转上一页
 $('.sub-line .search .btn-page.prev').click(function () {
   var page = $('.sub-line .search .btn-page.to input').val();
-  search(last_query, parseInt(page)-1);
+  search(last_query, parseInt(page) - 1);
 });
 
 // 检索结果集-跳转下一页
 $('.sub-line .search .btn-page.next').click(function () {
   var page = $('.sub-line .search .btn-page.to input').val();
-  search(last_query, parseInt(page)+1);
+  search(last_query, parseInt(page) + 1);
 });
 
 // 检索结果集-跳转第n页
@@ -311,8 +355,7 @@ $('.sub-line .search .btn-font-reduce').click(function () {
 
 // 检索结果-点击页码-查看该页经文
 $('.result-items').on('click', '.result-head .title', function () {
-  var cur_page_code = $(this).text().trim();
-  window.location = '/' + cur_page_code;
+  view_sutra($(this).text().trim());
 });
 
 // 检索结果-上一页
@@ -413,8 +456,7 @@ $('.search-order').click(function () {
   $('#cur-order').text($(this).text());
 });
 
-
-<!-- 中间粘住检索结果 -->
+//------------------中间粘住检索结果--------------
 
 // 检索结果集-增加字体
 $('.sub-line .stick .btn-font-enlarge').click(function () {
@@ -435,8 +477,7 @@ $('.content-center .result-items').on('click', '.result-head .btn-stick', functi
   $(this).parent().parent().remove();
 });
 
-
-<!-- 经目检索 -->
+//------------------经目检索---------------------
 
 // Datatable本地化
 var language = {
@@ -473,36 +514,36 @@ $('#my-sutra-table').DataTable({
       'targets': [0],
       'data': 'id',
       'render': function (data, type, full) {
-        return '<a href="/' + full[0] + '">' + full[0] + '</a>'
+        return '<span class="sutra-code">' + full[0] + '</span>'
       }
-    },
-    {
-      'targets': [1],
-      'data': 'title',
-      'render': function (data, type, full) {
-        return '<a href="/' + full[0] + '">' + full[1] + '</a>'
-      }
-    },
+    }
   ]
 });
 
+$('#my-sutra-table').on("click", '.sutra-code', function (event) {
+  view_sutra($(this).text());
+  $('#sutraNavModal').modal('hide');
 
-<!-- 目录导航 -->
+});
 
-// 目录导航初始化
-$(document).ready(function () {
-  postApi('/cbeta/mulu', {'data': {'zang': zang, 'jing': jing}}, function (res) {
-    var mulu_info = res.data;
-    $('#my-mulu-tree').jstree({
-      'core': {
-        'data': mulu_info
-      }
+//------------------目录导航---------------------
+
+$('#muluModal').on('shown.bs.modal', function (e) {
+  if (mulu_info === '') {
+    postApi('/cbeta/mulu', {'data': {'zang': zang, 'jing': jing}}, function (res) {
+      mulu_info = res.data;
+      $('#my-mulu-tree').jstree({
+        'core': {
+          'data': mulu_info
+        }
+      });
     });
-  });
+  }
 });
 
 // 双击目录节点时，打开链接
 $('#my-mulu-tree').bind("dblclick.jstree", function (event) {
   var node = $(event.target).closest("li");
-  window.location = '/' + node.attr('title');
+  view_sutra(node.attr('title'), false);
+  $('#muluModal').modal('hide');
 });

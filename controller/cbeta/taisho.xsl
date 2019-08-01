@@ -514,7 +514,7 @@
 
   <xsl:template match="anchor">
     <xsl:variable name="Ref" select="concat('#', @xml:id)"/>
-    <div data-toggle="popover" data-placement="auto" data-container="body" data-trigger="focus hover" data-delay="200">
+    <div>
         <xsl:if test="@xml:id">
           <xsl:attribute name="id">
             <xsl:value-of select="@xml:id"/>

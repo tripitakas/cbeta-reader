@@ -40,7 +40,7 @@ def format_hits(hits, shrink=True):
     def shrink(txt):
         """ 将检索结果缩起来，以便前端显示 """
         s, e = txt.find('<kw>'), txt.rfind('</kw>')
-        return '<div class="shrink">%s</div>%s<div class="shrink">%s</div>' % (txt[:s], txt[s:e + 5], txt[e + 5:])
+        return '<span class="shrink">%s</span>%s<span class="shrink">%s</span>' % (txt[:s], txt[s:e + 5], txt[e + 5:])
 
     for i, hit in enumerate(hits):
         if 'highlight' in hit:

@@ -492,14 +492,28 @@
 }
 
 /* 各种弹框 */
-#mouse-over-dlg {
+#note-click-dlg {
     display: none;
     position: absolute;
-    padding: 15px 20px 10px 20px;
     border-radius: 5px;
-    background: var(--Color_Grey_Light);
     max-width: 360px;
-    min-width: 300px;
+    min-width: 200px;
+    background: var(--Color_Grey_Line);
+    border: 1px solid var(--Color_Grey_Line);
+}
+
+#note-click-dlg .title {
+    background: var(--Color_Grey_Light);
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    text-align: center;
+    height: 35px;
+    padding: 5px;
+}
+
+#note-click-dlg .content {
+    min-height: 40px;
+    padding: 5px 10px;
 }
 
 .m-btn-group {
@@ -648,4 +662,9 @@
 
 #picModal .sutra-img {
     width: 100%;
+}
+
+#my-sutra-table td .sutra-code {
+    cursor: pointer;
+    color: #000;
 }

@@ -53,14 +53,18 @@ class CbetaBaseHandler(BaseHandler):
         if not xml_file:
             logging.warning('ori/%s not exist' % fuzzy_name)
             return self.send_error_response(errors.xml_file_not_found, render=render)
-        article = self.tran_xml(xml_file[0])
+        content = self.tran_xml(xml_file[0])
         logging.info(','.join([code, xml_file[0]]))
 
-        index = juan_list.index(juan)
-        prev = len(juan_list) > 1 and juan_list[1 if index < 1 else index - 1]
-        next = juan_list[index + 1 if index < len(juan_list) - 1 else len(juan_list) - 1]
+        if juan in juan_list:
+            index = juan_list.index(juan)
+            prev = len(juan_list) > 1 and juan_list[0 if index < 0 else index - 1]
+            next = juan_list[index + 1 if index < len(juan_list) - 1 else len(juan_list) - 1]
+        else:
+            prev = juan - 1 or 1
+            next = juan + 1
         return dict(
-            article=article, code=code, zang=zang, jing=jing, juan=juan,
+            content=content, code=code, zang=zang, jing=jing, juan=juan,
             juan_list=juan_list, prev=prev, next=next
         )
 

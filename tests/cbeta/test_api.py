@@ -61,3 +61,10 @@ class TestApi(APITestCase):
         data = self.parse_response(r)
         self.assertIn('img_url', data.get('data'))
 
+    def test_api_get_sutra(self):
+        """ 测试获取经文内容 """
+        page_codes = ['GA031n0032_p0230', 'T0001_001']
+        for page_code in page_codes:
+            r = self.fetch('/api/cbeta/sutra', body={'data': dict(page_code=page_code)})
+            data = self.parse_response(r)
+            self.assertIn('content', data.get('data'))

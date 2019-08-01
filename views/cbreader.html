@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 
 <head>
-  <title>CBETA-{{title}}</title>
+  <title>CBETA</title>
   <meta charset="UTF-8">
   <meta name="MobileOptimized" content="320"/>
   <meta name="HandheldFriendly" content="True"/>
@@ -82,7 +82,7 @@
               <div class="m-pager">
                 <div class="btn-page first" title="{{juan_list[0]}}">首卷</div>
                 <div class="btn-page prev" title="{{prev}}"><</div>
-                <div class="btn-page to"><input type="text" value="{{juan}}"/> / {{juan_list[-1]}}</div>
+                <div class="btn-page to"><input type="text" value="{{juan}}"/> / <span class="total">{{juan_list[-1]}}</span></div>
                 <div class="btn-page next" title="{{prev}}">></div>
                 <div class="btn-page last" title="{{juan_list[-1]}}">末卷</div>
               </div>
@@ -118,14 +118,6 @@
                 <div class="btn-txt btn-font-enlarge" title="放大字体">A+</div>
                 <div class="btn-txt btn-font-reduce" title="缩小字体">A-</div>
               </div>
-              <div class="order-wrap hide">
-                <span class="cur-order" id="cur-order">按相关度排列</span>
-                <img class="order-img" src="{{ static_url('imgs/icon_order.png') }}"/>
-                <div class="search-orders hide">
-                  <div class="search-order active">按相关度排列</div>
-                  <div class="search-order">按页编码排列</div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -134,7 +126,7 @@
           <!-- 左侧经文阅读区域 -->
           <div class="content-left">
             <div id="content-article" class="article">
-              {% raw article %}
+              {% raw content %}
             </div>
           </div>
           <!-- 中间粘住检索结果区域 -->
@@ -154,23 +146,19 @@
 </div>
 </div>
 
-<!-- 鼠标点击关键字弹出对话框 -->
-<div id="mouse-over-dlg">
-  <div class="dlg-txt"><b>得【大正】＝保</b></div>
-  <div class="m-btn-group">
-    <div class="m-btn"><a href=""><i class="ion-ios7-copy-outline"></i>复制</a></div>
-    <div class="m-btn"><a href=""><i class="ion-navicon"></i>查看列图</a></div>
-  </div>
+<!-- 鼠标点击校勘记弹出对话框 -->
+<div id="note-click-dlg" class="note-dlg">
+  <div class="title">校注</div>
+  <div class="content"></div>
 </div>
 
 <!-- 鼠标选中文字时弹出对话框 -->
-<div id="text-selected-dlg">
+<div id="text-selected-dlg" class="show-dlg">
   <ul>
     <li><img src="{{ static_url('imgs/icon9.png') }}"/><span>复制文字</span></li>
     <li><img src="{{ static_url('imgs/icon10.png') }}"/><span>引用复制</span></li>
-    <li><img src="{{ static_url('imgs/icon11.png') }}"/><span>查词典</span></li>
-    <li><img src="{{ static_url('imgs/icon12.png') }}"/><span>查字典</span></li>
-    <li><img src="{{ static_url('imgs/icon13.png') }}"/><span>检索</span></li>
+    <li><img src="{{ static_url('imgs/icon12.png') }}"/><span>查看图片</span></li>
+    <li><img src="{{ static_url('imgs/icon13.png') }}"/><span>全文检索</span></li>
   </ul>
 </div>
 
@@ -276,7 +264,7 @@
           <h4 class="modal-title">查看图片</h4>
         </div>
         <div class="modal-body">
-          <img id="sutra-img" class="sutra-img" src=""/>
+          <img id="sutra-img" class="sutra-img" alt="没有经文对应图片" src=""/>
         </div>
       </div>
     </div>
@@ -287,12 +275,12 @@
 <script src="{{ static_url('js/bootstrap.min.js') }}"></script>
 <script src="{{ static_url('assets/sweet-alert/sweet-alert.min.js') }}"></script>
 <script src="{{ static_url('js/backend.js') }}"></script>
-<script type="text/javascript" src="{{ static_url('assets/jquery-multi-select/jquery.multi-select.js') }}"></script>
-<script type="text/javascript" src="{{ static_url('assets/jquery-multi-select/jquery.quicksearch.js') }}"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/v/bs/dt-1.10.18/datatables.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
-<script type="text/javascript" src="{{ static_url('js/cbeta-sutra.js') }}"></script>
-<script type="text/javascript" src="{{ static_url('js/cbeta.js') }}"></script>
+<script src="{{ static_url('assets/jquery-multi-select/jquery.multi-select.js') }}"></script>
+<script src="{{ static_url('assets/jquery-multi-select/jquery.quicksearch.js') }}"></script>
+<script src="https://cdn.datatables.net/v/bs/dt-1.10.18/datatables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+<script src="{{ static_url('js/cbeta-sutra.js') }}"></script>
+<script src="{{ static_url('js/cbeta.js') }}"></script>
 
 
 </body>
