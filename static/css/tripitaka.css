@@ -316,6 +316,8 @@
     font-size: 18px;
     line-height: 30px;
     letter-spacing: 0.1em;
+    -webkit-user-select: auto;
+    user-select: auto;
 }
 
 .content .content-left .content-xml {

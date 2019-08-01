@@ -534,22 +534,21 @@ $('#my-sutra-table').DataTable({
 });
 
 $('#my-sutra-table').on("click", '.sutra-code', function (event) {
-  view_sutra($(this).text());
+  view_sutra($(this).text(), true);
   $('#sutraNavModal').modal('hide');
 
 });
 
 //------------------目录导航---------------------
 
+$('#my-mulu-tree').jstree({'core': {'data': null}});
+
 $('#muluModal').on('shown.bs.modal', function (e) {
   if (mulu_info === '') {
     postApi('/cbeta/mulu', {'data': {'zang': zang, 'jing': jing}}, function (res) {
       mulu_info = res.data;
-      $('#my-mulu-tree').jstree({
-        'core': {
-          'data': mulu_info
-        }
-      });
+      $('#my-mulu-tree').jstree(true).settings.core.data=mulu_info;
+      $('#my-mulu-tree').jstree(true).refresh();
     });
   }
 });
