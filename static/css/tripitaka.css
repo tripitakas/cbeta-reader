@@ -625,3 +625,7 @@
     background-color: #b88f6f;
     border-color: #b88f6f;
 }
+
+#picModal .sutra-img {
+    width: 100%;
+}

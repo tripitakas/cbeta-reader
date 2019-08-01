@@ -230,6 +230,7 @@ function get_sutra_maps() {
   }
   return sutra_maps;
 }
+
 // 全局变量
 var sutra_maps = get_sutra_maps();
 
@@ -308,14 +309,13 @@ $('.sub-line .search .btn-font-reduce').click(function () {
   $resultItem.css('font-size', cur_size - 1);
 });
 
-// 当前结果-点击page_code
+// 检索结果-点击页码-查看该页经文
 $('.result-items').on('click', '.result-head .title', function () {
   var cur_page_code = $(this).text().trim();
   window.location = '/' + cur_page_code;
 });
 
-
-// 当前结果-上一页
+// 检索结果-上一页
 $('.result-items').on('click', '.result-head .prev-page', function () {
   var item = $(this).parent().parent();
   var cur_page_code = item.find('.title').text();
@@ -337,7 +337,14 @@ $('.result-items').on('click', '.result-head .next-page', function () {
 
 // 当前结果-查看图片
 $('.result-items').on('click', '.result-head .btn-show-pic', function () {
-
+  var item = $(this).parent().parent();
+  var page_code = item.find('.title').text();
+  postApi('/cbeta/img_url', {'data': {'page_code': page_code}}, function (res) {
+    var img_url = res.img_url;
+    console.log(img_url);
+    $('#picModal #sutra-img').attr('src', img_url);
+    $('#picModal').modal();
+  });
 });
 
 // 当前结果-粘住
