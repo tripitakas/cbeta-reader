@@ -53,17 +53,6 @@
                 <img src="{{ static_url('imgs/icon_stick2.png') }}" class="btn-img zone-stick" title="粘住区域"/>
                 <img src="{{ static_url('imgs/icon_search.png') }}" class="btn-img zone-search" title="检索区域"/>
               </div>
-              <div class="tools">
-                <img data-toggle="modal" data-target="#muluModal" src="{{ static_url('imgs/icon_catalog.png') }}" class="btn-img btn-mulu" title="文章目次"/>
-              </div>
-              <div class="more">
-                <img src="{{ static_url('imgs/icon_more.png') }}" class="btn-img btn-more" title="更多"/>
-                <span class="btn-group more-group hidden" role="group" aria-label="更多">
-                  <button type="button" class="btn btn-default btn-sm btn-line-head">行首</button>
-                  <button type="button" class="btn btn-default btn-sm btn-note">校勘</button>
-                  <button type="button" class="btn btn-default btn-sm btn-bd">标点</button>
-                </span>
-              </div>
             </div>
             <div class="right">
               <div class="search">
@@ -100,6 +89,15 @@
               <div class="btn-tools" style="margin-left: 10px">
                 <div class="btn-txt btn-font-enlarge" title="放大字体">A+</div>
                 <div class="btn-txt btn-font-reduce" title="缩小字体">A-</div>
+                <img class="btn-img btn-mulu" title="文章目次" data-toggle="modal" data-target="#muluModal" src="{{ static_url('imgs/icon_catalog.png') }}" />
+              </div>
+              <div class="more">
+                <img src="{{ static_url('imgs/icon_more.png') }}" class="btn-img btn-more" title="更多"/>
+                <span class="btn-group more-group hidden" role="group" aria-label="更多">
+                  <button type="button" class="btn btn-default btn-sm btn-line-head">行首</button>
+                  <button type="button" class="btn btn-default btn-sm btn-note">校勘</button>
+                  <button type="button" class="btn btn-default btn-sm btn-bd">标点</button>
+                </span>
               </div>
             </div>
             <div class="center stick hide">
@@ -278,7 +276,7 @@
           <h4 class="modal-title">查看图片</h4>
         </div>
         <div class="modal-body">
-          <img id="sutra-img" class="sutra-img" src="" />
+          <img id="sutra-img" class="sutra-img" src=""/>
         </div>
       </div>
     </div>

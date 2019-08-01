@@ -201,6 +201,26 @@
     font-size: 14px;
 }
 
+.sub-line .btn-img {
+    width: 14px;
+    height: 14px;
+    margin: 6px 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sub-line .btn-img:hover {
+    transform: scale(1.2);
+}
+
+.sub-line .btn-sm {
+    line-height: 1.2;
+}
+
+.sub-line .more-group {
+    margin-top: 3px;
+}
+
 .sub-line .m-pager {
     margin-top: 4px;
 }
