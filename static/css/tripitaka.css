@@ -234,7 +234,6 @@
 }
 
 .sub-line .order-wrap {
-    display: none;
     margin: 5px 40px 0 30px;
     cursor: pointer;
     font-size: 14px;
@@ -313,9 +312,10 @@
 }
 
 .content .content-left .copyright {
+    width: 100%;
     padding-top: 10px;
     padding-bottom: 15px;
-    font-size: 12px;
+    font-size: 14px;
     color: var(--Color_Grey_Dark);
     border-top: 1px solid var(--Color_Grey);
     line-height: 22px;
@@ -432,13 +432,13 @@
     float: right;
 }
 
-.content-center .result-head .btn-operate {
+.content-center .result-head .btn-stick {
     cursor: pointer;
     background: url(../imgs/icon_close.png);
     background-size: 16px 16px;
 }
 
-.content-right .result-head .btn-operate {
+.content-right .result-head .btn-stick {
     cursor: pointer;
     background: url(../imgs/icon_stick.png);
     background-size: 16px 16px;

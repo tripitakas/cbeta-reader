@@ -29,7 +29,7 @@ class GetMuluApi(BaseHandler):
 
             mulu_info = get_mulu_info(data['zang'], data['jing'])
             if mulu_info is False:
-                return self.send_error_response(errors.mulu_not_found)
+                return self.send_error_response(errors.mulu_file_not_found)
 
             self.send_data_response(mulu_info)
 
@@ -82,12 +82,12 @@ class PrevPageApi(BaseHandler):
             head = re.search(r'^([A-Z]{1,2}\d+?n[A-Z]?\d+[A-Za-z]?)_p([a-z]?\d+)', cur_page_code)
             cur_page_no = head.group(2)
             prev_page_no = str(int(cur_page_no) - 1).zfill(len(cur_page_no))
-            prev_page_code = '%sp%s' % (head.group(1), prev_page_no)
+            prev_page_code = '%s_p%s' % (head.group(1), prev_page_no)
             r, total = search(prev_page_code, field='page_code')
             if total == 0:
                 return self.send_error_response(errors.no_result)
 
-            self.send_data_response(r)
+            self.send_data_response(r[0])
 
         except DbError as e:
             return self.send_db_error(e)
@@ -111,12 +111,12 @@ class NextPageApi(BaseHandler):
             head = re.search(r'^([A-Z]{1,2}\d+?n[A-Z]?\d+[A-Za-z]?)_p([a-z]?\d+)', cur_page_code)
             cur_page_no = head.group(2)
             prev_page_no = str(int(cur_page_no) + 1).zfill(len(cur_page_no))
-            prev_page_code = '%sp%s' % (head.group(1), prev_page_no)
+            prev_page_code = '%s_p%s' % (head.group(1), prev_page_no)
             r, total = search(prev_page_code, field='page_code')
             if total == 0:
                 return self.send_error_response(errors.no_result)
 
-            self.send_data_response(r)
+            self.send_data_response(r[0])
 
         except DbError as e:
             return self.send_db_error(e)

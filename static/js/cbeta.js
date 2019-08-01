@@ -215,27 +215,34 @@ function search(q, page) {
     $('.content-right .result-items').html(html);
     var totalPage = Math.ceil(res.data.total/10);
     $('.sub-line .search .btn-page.last').attr('title', totalPage);
+    $('.sub-line .search .btn-page.to input').val(page);
     $('.content-right').removeClass('hide');
     $('.sub-line .right').removeClass('hide');
     // 设置全局变量
     last_query = q;
-    $('.sub-line .search .btn-page.to input').val(page);
   });
 }
 
-function get_sutra_tips(sutra_code) {
+function get_sutra_maps() {
+  var sutra_maps = [];
   for (var i = 0, len = cbeta_sutras.length; i < len; i++) {
-    var sutra = cbeta_sutras[i];
-    if (sutra[0] == sutra_code) {
-      return sutra[1] + '(' + sutra[5] + '卷)[' + sutra[7] + ']';
-    }
+    sutra_maps[cbeta_sutras[i][0]] = cbeta_sutras[i];
   }
+  return sutra_maps;
+}
+// 全局变量
+var sutra_maps = get_sutra_maps();
+
+function get_sutra_tips(sutra_code) {
+  var sutra = sutra_maps[sutra_code];
+  if (sutra != undefined)
+    return sutra[1] + '(' + sutra[5] + '卷)[' + sutra[7] + ']';
 }
 
 function get_hit_html(sutra_code, page_code, text) {
   var head = '<div class="result-head"><span class="btn-nav prev-page"><</span><span class="title">' + page_code
-      + '</span><span class="btn-nav next-page">></span><img class="btn-img show-pic" src="/static/imgs/icon_pic.png">'
-      + '<img class="btn-img btn-operate"></div>';
+      + '</span><span class="btn-nav next-page">></span><img class="btn-img btn-show-pic" src="/static/imgs/icon_pic.png">'
+      + '<img class="btn-img btn-stick"></div>';
   var name = '<div class="result-name">' + get_sutra_tips(sutra_code) + '</div>';
   var text = '<div class="result-text slim-scroll">' + text + '</div>';
   return '<div class="result-item">' + head + name + text + '</div>';
@@ -255,30 +262,30 @@ $('.m-header #search-input').on("keydown", function (event) {
   }
 });
 
-// 检索结果-跳转第一页
+// 检索结果集-跳转第一页
 $('.sub-line .search .btn-page.first').click(function () {
   search(last_query, 1);
 });
 
-// 检索结果-跳转最末页
+// 检索结果集-跳转最末页
 $('.sub-line .search .btn-page.last').click(function () {
   var page = $('.sub-line .search .btn-page.last').attr('title');
   search(last_query, page);
 });
 
-// 检索结果-跳转上一页
+// 检索结果集-跳转上一页
 $('.sub-line .search .btn-page.prev').click(function () {
   var page = $('.sub-line .search .btn-page.to input').val();
   search(last_query, parseInt(page)-1);
 });
 
-// 检索结果-跳转下一页
+// 检索结果集-跳转下一页
 $('.sub-line .search .btn-page.next').click(function () {
   var page = $('.sub-line .search .btn-page.to input').val();
   search(last_query, parseInt(page)+1);
 });
 
-// 检索结果-跳转第n页
+// 检索结果集-跳转第n页
 $('.sub-line .search .btn-page.to').on("keydown", function (event) {
   var keyCode = event.keyCode || event.which;
   if (keyCode == "13") {
@@ -287,22 +294,59 @@ $('.sub-line .search .btn-page.to').on("keydown", function (event) {
   }
 });
 
-// 检索结果-增加字体
+// 检索结果集-增加字体
 $('.sub-line .search .btn-font-enlarge').click(function () {
   var $resultItem = $('.content-right .result-item');
   var cur_size = parseFloat($resultItem.css('font-size'));
   $resultItem.css('font-size', cur_size + 1);
 });
 
-// 检索结果-减少字体
+// 检索结果集-减少字体
 $('.sub-line .search .btn-font-reduce').click(function () {
   var $resultItem = $('.content-right .result-item');
   var cur_size = parseFloat($resultItem.css('font-size'));
   $resultItem.css('font-size', cur_size - 1);
 });
 
+// 当前结果-点击page_code
+$('.result-items').on('click', '.result-head .title', function () {
+  var cur_page_code = $(this).text().trim();
+  window.location = '/' + cur_page_code;
+});
 
-// 下一条检索结果
+
+// 当前结果-上一页
+$('.result-items').on('click', '.result-head .prev-page', function () {
+  var item = $(this).parent().parent();
+  var cur_page_code = item.find('.title').text();
+  postApi('/cbeta/prev_page', {'data': {'cur_page_code': cur_page_code}}, function (hit) {
+    var html = get_hit_html(hit['sutra_code'], hit['page_code'], hit['normal']);
+    item.prop('outerHTML', html);
+  });
+});
+
+// 当前结果-下一页
+$('.result-items').on('click', '.result-head .next-page', function () {
+  var item = $(this).parent().parent();
+  var cur_page_code = item.find('.title').text();
+  postApi('/cbeta/next_page', {'data': {'cur_page_code': cur_page_code}}, function (hit) {
+    var html = get_hit_html(hit['sutra_code'], hit['page_code'], hit['normal']);
+    item.prop('outerHTML', html);
+  });
+});
+
+// 当前结果-查看图片
+$('.result-items').on('click', '.result-head .btn-show-pic', function () {
+
+});
+
+// 当前结果-粘住
+$('.content-right .result-items').on('click', '.result-head .btn-stick', function () {
+  $('.main-right .content .content-center').removeClass('hide');
+  $('.m-header .sub-line .center').removeClass('hide');
+  $('.content-center .result-items').append($(this).parent().parent());
+});
+
 
 // 配置自定检索范围
 $('#my-select').multiSelect({
@@ -362,22 +406,25 @@ $('.search-order').click(function () {
   $('#cur-order').text($(this).text());
 });
 
-// 粘住某个检索结果
-$('.content-right .result-item .btn-operate').click(function () {
-  $('.main-right .content .content-center').removeClass('hide');
-  $('.m-header .sub-line .center').removeClass('hide');
-  var item = $(this).parent().parent();
-  item.find('.btn-operate').bind('click', function () {
-    $(this).parent().parent().remove();
-  });
-  $('.content-center .result-items').append(item);
-});
-
 
 <!-- 中间粘住检索结果 -->
 
+// 检索结果集-增加字体
+$('.sub-line .stick .btn-font-enlarge').click(function () {
+  var $resultItem = $('.content-center .result-item');
+  var cur_size = parseFloat($resultItem.css('font-size'));
+  $resultItem.css('font-size', cur_size + 1);
+});
+
+// 检索结果集-减少字体
+$('.sub-line .stick .btn-font-reduce').click(function () {
+  var $resultItem = $('.content-center .result-item');
+  var cur_size = parseFloat($resultItem.css('font-size'));
+  $resultItem.css('font-size', cur_size - 1);
+});
+
 // 删除粘住的结果
-$('.content-center .result-item .btn-operate').click(function () {
+$('.content-center .result-items').on('click', '.result-head .btn-stick', function () {
   $(this).parent().parent().remove();
 });
 
@@ -430,20 +477,6 @@ $('#my-sutra-table').DataTable({
       }
     },
   ]
-});
-
-function tableBind() {
-  // 双击时阅读
-  $('#my-table tbody tr').unbind('dblclick').dblclick(function () {
-    var sutra_id = $(this).children().first().text();
-    window.location = '/' + sutra_id;
-  });
-}
-
-tableBind();
-
-$('#my-sutra-table').DataTable().on('draw', function () {
-  tableBind();
 });
 
 

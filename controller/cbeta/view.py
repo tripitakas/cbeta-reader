@@ -34,6 +34,9 @@ class CbetaHandler(BaseHandler):
             else:
                 return self.send_error_response(errors.sutra_code_error, render=True)
 
+            if not juan:
+                return self.send_error_response(errors.juan_not_found, render=True)
+
             # 获取卷信息
             juan_list = get_juan_info(zang, jing)
             if juan_list is False:
@@ -47,7 +50,7 @@ class CbetaHandler(BaseHandler):
             xml_file = glob(os.path.join(XML_DIR, 'ori', zang, '**', fuzzy_name))
             if not xml_file:
                 logging.warning('ori/%s not exist' % fuzzy_name)
-                return self.send_error_response(errors.xml_not_found, render=True)
+                return self.send_error_response(errors.xml_file_not_found, render=True)
             article = self.get_article(xml_file[0])
             title = re.search(r'<div class="title">([^<\n]+)</div>', article)
             title = title or re.search(r'<div class="jhead">([^<\n]+)', article)
