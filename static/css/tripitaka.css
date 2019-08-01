@@ -198,12 +198,12 @@
 
 .sub-line .btn-txt {
     margin-top: 4px;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .sub-line .btn-img {
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
     margin: 6px 6px;
     cursor: pointer;
     transition: all 0.2s;
@@ -320,6 +320,7 @@
 
 .content .content-left .content-xml {
     width: 100%;
+    padding-bottom: 10px;
 }
 
 .content .content-left .bd {
@@ -338,16 +339,24 @@
     font-size: 14px;
     color: var(--Color_Grey_Dark);
     border-top: 1px solid var(--Color_Grey);
-    line-height: 22px;
+    line-height: 24px;
+}
+
+.content-left .copyright .center {
+    margin: auto;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
 }
 
 .content .content-left .note {
     font-family: consola;
     color: var(--Color_Brown_Darker);
-    font-size: 75%;
+    font-size: 60%;
     letter-spacing: 0;
     top: -.5em;
-    float: left;
+    vertical-align: super;
     cursor: pointer;
 }
 
@@ -355,14 +364,6 @@
     display: none;
 }
 
-.content .content-left span, .content .content-left div {
-    float: left;
-}
-
-.content .content-left .text {
-    float: left;
-    display: inline;
-}
 
 /* 行首模式 */
 .content .content-left .article-row {
@@ -380,9 +381,21 @@
     background: #ebebeb;
 }
 
+.article-row span, .article-row div {
+    float: left;
+}
+
+
 /* 文章模式 */
 .content .content-left .article {
     float: left;
+}
+
+.article .head,
+.article .jhead {
+    display: block;
+    text-align: center;
+    font-size: 1.2em;
 }
 
 .article .lb {
@@ -390,14 +403,14 @@
 }
 
 .article .doc-number {
-    display: none;
+    display: block;
 }
 
 .article .para {
     clear: left;
     display: block;
-    width: 40px;
-    min-height: 10px;
+    width: 100%;
+    min-height: 12px;
 }
 
 .article .byline {
@@ -405,6 +418,15 @@
     display: block;
     text-align: right;
     font-size: 1em;
+}
+
+.article .inline-note {
+    color: var(--Color_Brown_Darker);
+    font-size: 0.9em;
+}
+
+.article .commentary .panel-collapse {
+    background: var(--Color_Grey_Light);
 }
 
 /* 右侧-正文-中间区域 */
@@ -499,7 +521,7 @@
     max-width: 360px;
     min-width: 200px;
     background: var(--Color_Grey_Line);
-    border: 1px solid var(--Color_Grey_Line);
+    box-shadow: 10px 10px 5px #888888;
 }
 
 #note-click-dlg .title {
@@ -508,11 +530,12 @@
     border-top-right-radius: 5px;
     text-align: center;
     height: 35px;
-    padding: 5px;
+    padding: 8px;
+    font-weight: bold;
 }
 
 #note-click-dlg .content {
-    min-height: 40px;
+    min-height: 35px;
     padding: 5px 10px;
 }
 
@@ -553,6 +576,7 @@
     padding: 12px 12px 0 15px;
     border-radius: 5px;
     background: var(--Color_Grey_Light);
+    box-shadow: 10px 10px 5px #888888;
 }
 
 #text-selected-dlg ul li {

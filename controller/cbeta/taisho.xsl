@@ -105,15 +105,18 @@
         <div class="content-xml">
           <xsl:apply-templates/>
         </div>
-        <div class="copyright">【經文資訊】
-          <xsl:value-of select="$copyright"/>
-          第
-          <xsl:value-of select="concat(substring-before($current_sutra, 'n'), ' 冊 No. ', substring-after($current_sutra, 'n'), ' ', $title)"/>
-          <br/>
-          【原始資料】
-          <xsl:value-of select="/TEI/teiHeader/encodingDesc/projectDesc/p[@xml:lang='zh-Hant']"/>
-          <br/>
-          【其他事項】本資料庫可自由免費流通，詳細內容請參閱【中華電子佛典協會資料庫版權宣告】
+        <div class="copyright">
+          <div class="center">
+            【經文資訊】
+            <xsl:value-of select="$copyright"/>
+            第
+            <xsl:value-of select="concat(substring-before($current_sutra, 'n'), ' 冊 No. ', substring-after($current_sutra, 'n'), ' ', $title)"/>
+            <br/>
+            【原始資料】
+            <xsl:value-of select="/TEI/teiHeader/encodingDesc/projectDesc/p[@xml:lang='zh-Hant']"/>
+            <br/>
+            【其他事項】本資料庫可自由免費流通，詳細內容請參閱【中華電子佛典協會資料庫版權宣告】
+          </div>
         </div>
       </body>
     </html>
@@ -132,40 +135,40 @@
   <xsl:template match="cb:mulu"/>
 
   <xsl:template match="cb:docNumber">
-    <div class="doc-number">
+    <span class="doc-number">
       <xsl:apply-templates/>
-    </div>
+    </span>
   </xsl:template>
 
   <xsl:template match="lb">
-    <div class="lb">
+    <span class="lb">
       <xsl:value-of select="concat('p', @n)"/>
-    </div>
+    </span>
   </xsl:template>
 
   <xsl:template match="p">
     <p class="para"></p>
-<!--    <div class="para">-->
-<!--      <xsl:if test="@xml:id">-->
-<!--        <xsl:attribute name="id">-->
-<!--          <xsl:value-of select="@xml:id"/>-->
-<!--        </xsl:attribute>-->
-<!--      </xsl:if>-->
-<!--    </div>-->
+    <!--    <span class="para">-->
+    <!--      <xsl:if test="@xml:id">-->
+    <!--        <xsl:attribute name="id">-->
+    <!--          <xsl:value-of select="@xml:id"/>-->
+    <!--        </xsl:attribute>-->
+    <!--      </xsl:if>-->
+    <!--    </span>-->
     <xsl:apply-templates/>
   </xsl:template>
 
   <xsl:template match="p/text()">
-    <div class="text">
+    <span class="text">
       <xsl:value-of select="."/>
-    </div>
+    </span>
     <xsl:apply-templates/>
   </xsl:template>
 
   <xsl:template match="g">
-    <div class="text g">
+    <span class="text g">
       <xsl:value-of select="."/>
-    </div>
+    </span>
   </xsl:template>
 
   <!--处理表格table-->
@@ -208,7 +211,7 @@
   <!--处理所有的颂-->
   <!-- rend="margin-left:1em;text-indent:-1em" -->
   <xsl:template match="lg">
-    <div class="lg">
+    <span class="lg">
       <xsl:if test="@xml:id">
         <xsl:attribute name="id">
           <xsl:value-of select="@xml:id"/>
@@ -227,7 +230,7 @@
           </xsl:otherwise>
         </xsl:choose>
       </xsl:attribute>
-    </div>
+    </span>
     <!--xsl:choose>
         <xsl:when test="@rend">
             <xsl:attribute name="style">
@@ -249,9 +252,9 @@
   <!--  </xsl:template>-->
 
   <xsl:template match="lg/l">
-    <div class="l">
+    <span class="l">
       <xsl:apply-templates/>
-    </div>
+    </span>
   </xsl:template>
 
   <!--清除文档中无用空格, 替换错误的人名分割符号-->
@@ -280,7 +283,7 @@
 
   <!--处理段落-->
   <!--xsl:template match="p[contains(@rend, 'inline')]">
-      <div><xsl:apply-templates/></div>
+      <span><xsl:apply-templates/></span>
   </xsl:template-->
 
   <!--xsl:template match="p[@cb:type='dharani']/lb">
@@ -312,32 +315,32 @@
     <p class="para"></p>
     <xsl:choose>
       <xsl:when test="not(cb:tt)">
-        <div class="dharani">
+        <span class="dharani">
           <xsl:apply-templates/>
-        </div>
+        </span>
       </xsl:when>
       <xsl:when test="cb:tt[@place='inline']">
-        <div class="dharani">
-          <div lang="sa-Sidd">
+        <span class="dharani">
+          <span lang="sa-Sidd">
             <xsl:apply-templates select="cb:tt/cb:t[@xml:lang='sa-Sidd']"/>
-          </div>
-          <!--div lang="sa-Sidd"><xsl:apply-templates select="starts-with(cb:tt/cb:t[@xml:lang], 'sa')"/></div-->
-          <!--div lang="sa-x-rj"><xsl:apply-templates select="cb:tt/cb:t[@xml:lang='sa-x-rj']"/></div-->
-          <div lang="zh-Hant">(<xsl:apply-templates select="cb:tt/cb:t[@xml:lang='zh-Hant']"/>)
-          </div>
-          <!--div lang="zh-Hant">(<xsl:apply-templates select="starts-with(cb:tt/cb:t[@xml:lang], 'zh')"/>)</div-->
-          <!--div lang="zh-Hant">(<xsl:apply-templates select="cb:tt/cb:t[@xml:lang='zh-x-yy']"/>)</div-->
+          </span>
+          <!--span lang="sa-Sidd"><xsl:apply-templates select="starts-with(cb:tt/cb:t[@xml:lang], 'sa')"/></span-->
+          <!--span lang="sa-x-rj"><xsl:apply-templates select="cb:tt/cb:t[@xml:lang='sa-x-rj']"/></span-->
+          <span lang="zh-Hant">(<xsl:apply-templates select="cb:tt/cb:t[@xml:lang='zh-Hant']"/>)
+          </span>
+          <!--span lang="zh-Hant">(<xsl:apply-templates select="starts-with(cb:tt/cb:t[@xml:lang], 'zh')"/>)</span-->
+          <!--span lang="zh-Hant">(<xsl:apply-templates select="cb:tt/cb:t[@xml:lang='zh-x-yy']"/>)</span-->
           <xsl:apply-templates/>
-        </div>
+        </span>
       </xsl:when>
       <xsl:otherwise>
-        <div lang="sa-Sidd" class="dharani">
+        <span lang="sa-Sidd" class="dharani">
           <xsl:apply-templates select="cb:tt/cb:t[@xml:lang='sa-Sidd']"/>
-        </div>
+        </span>
         <!--p lang="sa-x-rj" class="dharani"><xsl:apply-templates select="cb:tt/cb:t[@xml:lang='sa-x-rj']"/></p-->
-        <div lang="zh-Hant" class="dharani">
+        <span lang="zh-Hant" class="dharani">
           <xsl:apply-templates select="cb:tt/cb:t[@xml:lang='zh-Hant']"/>
-        </div>
+        </span>
         <!--p lang="zh-Hant" class="dharani"><xsl:apply-templates select="cb:tt/cb:t[@xml:lang='zh-x-yy']"/></p-->
       </xsl:otherwise>
     </xsl:choose>
@@ -368,12 +371,12 @@
 
   <!--处理note-->
   <xsl:template match="note[@place='inline']|note[@type='inline']">
-    <div lang="lzh-Hant" class="note">(<xsl:apply-templates/>)
-    </div>
+    <span lang="lzh-Hant" class="inline-note">(<xsl:apply-templates/>)
+    </span>
   </xsl:template>
 
   <xsl:template match="space">
-    <div style="display:inline-block">
+    <span style="display:inline-block">
       <xsl:if test="@quantity">
         <xsl:variable name="unit">
           <xsl:choose>
@@ -391,7 +394,7 @@
           <xsl:value-of select="$unit"/>
         </xsl:attribute>
       </xsl:if>
-    </div>
+    </span>
   </xsl:template>
 
   <!--处理teiHeader-->
@@ -409,31 +412,31 @@
     <!--xsl:if test="not(starts-with($parent,'div'))">
       <xsl:apply-templates/>
     </xsl:if-->
-    <div class="head">
+    <span class="head">
       <xsl:apply-templates/>
-    </div>
+    </span>
   </xsl:template>
 
   <!--标题 type=X, pin-->
   <xsl:template match="cb:jhead">
     <p class="para"></p>
-    <div class="jhead">
+    <span class="jhead">
       <xsl:apply-templates/>
-    </div>
+    </span>
   </xsl:template>
 
   <xsl:template match="title">
-    <div class="title">
+    <span class="title">
       <xsl:apply-templates/>
-    </div>
+    </span>
   </xsl:template>
 
   <!--最后一个作者译者cb:type="author"之后空出两行然后开始正文-->
   <xsl:template match="byline">
     <p class="para"></p>
-    <div class="byline">
+    <span class="byline">
       <xsl:apply-templates/>
-    </div>
+    </span>
     <xsl:if test="../byline[last()]=.">
       <!--      <br/>-->
     </xsl:if>
@@ -442,9 +445,9 @@
   <!--列表中的作者译者不另外换行,应该清洗掉这种标志 XXX-->
   <xsl:template match="list//byline|cb:jl_byline">
     <p class="para"></p>
-    <div class="byline">
+    <span class="byline">
       <xsl:apply-templates/>
-    </div>
+    </span>
   </xsl:template>
 
   <!--处理列表-->
@@ -461,9 +464,9 @@
 
   <!--处理空缺 unclear@reason-->
   <xsl:template match="unclear">
-    <div class="unclear">
+    <span class="unclear">
       <xsl:text>&#x258a;</xsl:text>
-    </div>
+    </span>
   </xsl:template>
 
   <!--使用popover显示注释, 链接三个标签，可能有些不对 TODO 使用超链接-->
@@ -514,85 +517,85 @@
 
   <xsl:template match="anchor">
     <xsl:variable name="Ref" select="concat('#', @xml:id)"/>
-    <div>
-        <xsl:if test="@xml:id">
-          <xsl:attribute name="id">
-            <xsl:value-of select="@xml:id"/>
-          </xsl:attribute>
-        </xsl:if>
-        <xsl:attribute name="class">
-          <xsl:value-of select="concat('note ', key('note_target', $Ref)/@type)"/>
+    <span>
+      <xsl:if test="@xml:id">
+        <xsl:attribute name="id">
+          <xsl:value-of select="@xml:id"/>
         </xsl:attribute>
-        <xsl:choose>
-          <xsl:when test="@type='cb-app' and key('app_from', $Ref)">
-            <xsl:attribute name="data-title">
-              <xsl:value-of select="key('app_from', $Ref)/../../head"></xsl:value-of>
-            </xsl:attribute>
-            <xsl:attribute name="data-content">
-              <xsl:apply-templates select="key('app_from', $Ref)"/>
-            </xsl:attribute>
-            <xsl:value-of select="concat('[c', substring(@xml:id, 5), ']')"/>
-          </xsl:when>
-          <xsl:when test="@type='cb-app' and key('choice_from', $Ref)/sic">
-            <xsl:attribute name="data-title">
-              <xsl:value-of select="key('choice_from', $Ref)/../../head"></xsl:value-of>
-            </xsl:attribute>
-            <xsl:attribute name="data-content">
-              原文為:
-              <xsl:apply-templates select="key('choice_from', $Ref)/sic"/>
-            </xsl:attribute>
-            <xsl:value-of select="concat('[c', substring(@xml:id, 5), ']')"/>
-          </xsl:when>
-          <xsl:when test="@type='cb-app' and key('choice_from', $Ref)/reg">
-            <xsl:attribute name="data-title">
-              <xsl:apply-templates select="key('choice_from', $Ref)/reg/@type"/>  <!--通用詞-->
-            </xsl:attribute>
-            <xsl:attribute name="data-content">
-              <xsl:apply-templates select="key('choice_from', $Ref)"/>
-            </xsl:attribute>
-            <xsl:value-of select="concat('[c', substring(@xml:id, 5), ']')"/>
-          </xsl:when>
-          <xsl:when test="@type='star' and key('app_from', $Ref)">
-            <xsl:attribute name="data-title">
-              <!--xsl:text>註解</xsl:text-->
-              <xsl:value-of select="key('app_from', $Ref)/../../head"></xsl:value-of>
-            </xsl:attribute>
-            <xsl:attribute name="data-content">
-              <xsl:apply-templates select="key('app_from', $Ref)"/>,
-              <!--xsl:variable name="tmp" select="substring(key('app_from', $Ref)/@corresp, 2)"/>
-              <xsl:apply-templates select="key('note_n', $tmp)"/-->
-            </xsl:attribute>
-            <xsl:text>[*]</xsl:text>
-          </xsl:when>
-          <xsl:when test="key('note_target', $Ref)">
-            <xsl:attribute name="data-title">
-              <!--xsl:text>註釋xx</xsl:text-->
-              <xsl:value-of select="key('note_target', $Ref)/../../head"></xsl:value-of>
-            </xsl:attribute>
-            <xsl:attribute name="data-content">
-              <xsl:apply-templates select="key('note_target', $Ref)"/>
-            </xsl:attribute>
-            <xsl:value-of select="concat('[', substring(@n, 6), ']')"/>
-          </xsl:when>
-          <xsl:when test="@type='circle'">
-          </xsl:when>
-        </xsl:choose>
-      </div>
+      </xsl:if>
+      <xsl:attribute name="class">
+        <xsl:value-of select="concat('note ', key('note_target', $Ref)/@type)"/>
+      </xsl:attribute>
+      <xsl:choose>
+        <xsl:when test="@type='cb-app' and key('app_from', $Ref)">
+          <xsl:attribute name="data-title">
+            <xsl:value-of select="key('app_from', $Ref)/../../head"></xsl:value-of>
+          </xsl:attribute>
+          <xsl:attribute name="data-content">
+            <xsl:apply-templates select="key('app_from', $Ref)"/>
+          </xsl:attribute>
+          <xsl:value-of select="concat('[c', substring(@xml:id, 5), ']')"/>
+        </xsl:when>
+        <xsl:when test="@type='cb-app' and key('choice_from', $Ref)/sic">
+          <xsl:attribute name="data-title">
+            <xsl:value-of select="key('choice_from', $Ref)/../../head"></xsl:value-of>
+          </xsl:attribute>
+          <xsl:attribute name="data-content">
+            原文為:
+            <xsl:apply-templates select="key('choice_from', $Ref)/sic"/>
+          </xsl:attribute>
+          <xsl:value-of select="concat('[c', substring(@xml:id, 5), ']')"/>
+        </xsl:when>
+        <xsl:when test="@type='cb-app' and key('choice_from', $Ref)/reg">
+          <xsl:attribute name="data-title">
+            <xsl:apply-templates select="key('choice_from', $Ref)/reg/@type"/>  <!--通用詞-->
+          </xsl:attribute>
+          <xsl:attribute name="data-content">
+            <xsl:apply-templates select="key('choice_from', $Ref)"/>
+          </xsl:attribute>
+          <xsl:value-of select="concat('[c', substring(@xml:id, 5), ']')"/>
+        </xsl:when>
+        <xsl:when test="@type='star' and key('app_from', $Ref)">
+          <xsl:attribute name="data-title">
+            <!--xsl:text>註解</xsl:text-->
+            <xsl:value-of select="key('app_from', $Ref)/../../head"></xsl:value-of>
+          </xsl:attribute>
+          <xsl:attribute name="data-content">
+            <xsl:apply-templates select="key('app_from', $Ref)"/>,
+            <!--xsl:variable name="tmp" select="substring(key('app_from', $Ref)/@corresp, 2)"/>
+            <xsl:apply-templates select="key('note_n', $tmp)"/-->
+          </xsl:attribute>
+          <xsl:text>[*]</xsl:text>
+        </xsl:when>
+        <xsl:when test="key('note_target', $Ref)">
+          <xsl:attribute name="data-title">
+            <!--xsl:text>註釋xx</xsl:text-->
+            <xsl:value-of select="key('note_target', $Ref)/../../head"></xsl:value-of>
+          </xsl:attribute>
+          <xsl:attribute name="data-content">
+            <xsl:apply-templates select="key('note_target', $Ref)"/>
+          </xsl:attribute>
+          <xsl:value-of select="concat('[', substring(@n, 6), ']')"/>
+        </xsl:when>
+        <xsl:when test="@type='circle'">
+        </xsl:when>
+      </xsl:choose>
+    </span>
 
   </xsl:template>
 
   <!--处理div 折叠式注释 TODO, 里面的异体字处理有些问题D47n8936_002-->
   <!--xsl:template match="cb:div[@type='orig']"-->
   <xsl:template match="cb:div[@type='commentary']">
-    <div class="commentary panel-collapse">
-      <a data-toggle="collapse" data-parent="#accordion" href="#{generate-id()}"><div class="caret"/>註疏：
+    <span class="commentary panel-collapse">
+      <a data-toggle="collapse" data-parent="#accordion" href="#{generate-id()}"><span class="caret"/>
       </a>
-      <div id="{generate-id()}" class="panel-collapse collapse">
-        <div class="panel-body">
+      <span id="{generate-id()}" class="panel-collapse collapse">
+        <span class="panel-body">
           <xsl:apply-templates/>
-        </div>
-      </div>
-    </div>
+        </span>
+      </span>
+    </span>
     <!--    <br/>-->
   </xsl:template>
 
@@ -669,14 +672,14 @@
 
   <!--公式强调角标-->
   <xsl:template match="hi">
-    <div class="formula">
+    <span class="formula">
       <xsl:if test="@rend">
         <xsl:attribute name="style">
           <xsl:value-of select="@rend"/>
         </xsl:attribute>
       </xsl:if>
       <xsl:apply-templates/>
-    </div>
+    </span>
   </xsl:template>
 
 
@@ -718,11 +721,11 @@
   <!--'sa-x-rj', 'en', 'sa-Sidd', 'zh', 'san-tr', 'sa', 'x-unknown', 'pi', 'zh-x-yy'-->
   <!--sa, pi, x-unknown-->
   <xsl:template match="foreign">
-    <!--div>
+    <!--span>
         <xsl:attribute name="lang">
           <xsl:value-of select="@xml:lang"/>
         </xsl:attribute>
-    </div-->
+    </span-->
     <xsl:choose>
       <xsl:when test="@xml:lang='sa'">
         <xsl:text>[梵語]</xsl:text>
@@ -741,9 +744,9 @@
 
   <!-- 经录的卷数 -->
   <xsl:template match="cb:jl_juan">
-    <div class="jl">
+    <span class="jl">
       <xsl:apply-templates/>
-    </div>
+    </span>
   </xsl:template>
 
   <!-- 经录的标题: TODO 做一个超链接到应该的文件 -->
@@ -761,9 +764,9 @@
 
   <!--敬语-->
   <xsl:template match="persName">
-    <div class="honorific">
+    <span class="honorific">
       <xsl:apply-templates/>
-    </div>
+    </span>
   </xsl:template>
 
   <!--string-split函数: 空格分割后取值witness@id-->
