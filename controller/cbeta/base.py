@@ -84,6 +84,6 @@ class CbetaBaseHandler(BaseHandler):
         article = transform(etree.parse(xml_file))
         article = str(article)
         article = article[article.find('<body>') + 6: article.rfind('</body>')]
-        re_text = r'<div class="text">([\s\S]*)</div>'
+        re_text = r'<span class="text">([\s\S]*)</span>'
         article = re.sub(re_text, format_bd, article, flags=re.M)
         return article

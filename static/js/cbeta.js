@@ -233,7 +233,7 @@ $('.zoom .max-img').click(function () {
 
 
 // 点击经文校勘记，显示弹框
-$('#content-article .note').click(function (e) {
+$('#content-article').on('click', '.note', function (e) {
   var $note_dlg = $('#note-click-dlg');
   var positionX = e.pageX;
   var positionY = e.pageY;
@@ -290,6 +290,34 @@ $('.main-content .content-left').mouseup(function (e) {
     $('#note-click-dlg').hide();
   }
 });
+
+// 复制文字
+$('#text-selected-dlg #copy-text').click(function () {
+  document.execCommand("copy");
+  $('#text-selected-dlg').hide();
+});
+
+// 引用复制
+$('#text-selected-dlg #cite-copy').click(function () {
+  document.execCommand("copy");
+  $('#text-selected-dlg').hide();
+});
+
+// 全文检索
+$('#text-selected-dlg #full-search').click(function () {
+  var txt = window.getSelection ? window.getSelection() : document.selection.createRange().text;
+  console.log(txt);
+  $('.m-header #search-input').val(txt.toString());
+  $('.m-header #btn-search').click();
+  $('#text-selected-dlg').hide();
+});
+
+// 查看图片
+$('#text-selected-dlg #view-pic').click(function () {
+  document.execCommand("copy");
+  $('#text-selected-dlg').hide();
+});
+
 
 //------------------右侧全文检索-----------------
 
@@ -433,28 +461,6 @@ $('.scope-item').click(function () {
   $('#cur-scope').text($(this).text());
 });
 
-// 弹框-检索结果排序方式
-$('.sub-line .order-wrap').on('click', function (event) {
-  event.stopPropagation();
-  $('.search-orders').toggleClass('hide');
-  var flag = true;
-  var $tag = $('.search-orders');
-  $tag.show();
-  $(document).bind("click", function (e) {
-    var target = $(e.target);
-    if (target.closest($tag).length === 0 && flag === true) {
-      $tag.hide();
-      flag = false;
-    }
-  });
-});
-
-// 选择某种排序方式
-$('.search-order').click(function () {
-  $('.search-order').removeClass('active');
-  $(this).addClass('active');
-  $('#cur-order').text($(this).text());
-});
 
 //------------------中间粘住检索结果--------------
 
