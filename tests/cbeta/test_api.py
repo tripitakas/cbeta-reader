@@ -47,12 +47,17 @@ class TestApi(APITestCase):
         self.assertIsNotNone(r4)
 
     def test_api_search(self):
-        """ 全文检索 """
+        """ 测试全文检索 """
         # 测试简单关键字
         r = self.fetch('/api/cbeta/search', body={'data': dict(q='菩薩', page='2')})
         self.assert_code(200, r)
         data = self.parse_response(r)
         self.assertIn('hits', data.get('data'))
 
-
+    def test_api_img_url(self):
+        """ 测试获取图片url """
+        r = self.fetch('/api/cbeta/img_url', body={'data': dict(page_code='T52n2103_p0222')})
+        self.assert_code(200, r)
+        data = self.parse_response(r)
+        self.assertIn('img_url', data.get('data'))
 

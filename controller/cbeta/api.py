@@ -9,6 +9,7 @@ import controller.validate as v
 from controller.cbeta.esearch import search
 from controller.base import BaseHandler, DbError
 from controller.cbeta.meta import get_mulu_info
+from controller.cbeta.define import canon_maps
 
 
 class GetMuluApi(BaseHandler):
@@ -73,7 +74,10 @@ class PrevPageApi(BaseHandler):
         """ 上一页 """
         try:
             data = self.get_request_data()
-            rules = [(v.not_empty, 'cur_page_code')]
+            rules = [
+                (v.not_empty, 'cur_page_code'),
+                (v.is_page_code, 'cur_page_code'),
+            ]
             err = v.validate(data, rules)
             if err:
                 return self.send_error_response(err)
@@ -102,7 +106,10 @@ class NextPageApi(BaseHandler):
         """ 下一页 """
         try:
             data = self.get_request_data()
-            rules = [(v.not_empty, 'cur_page_code')]
+            rules = [
+                (v.not_empty, 'cur_page_code'),
+                (v.is_page_code, 'cur_page_code'),
+            ]
             err = v.validate(data, rules)
             if err:
                 return self.send_error_response(err)
@@ -122,3 +129,34 @@ class NextPageApi(BaseHandler):
             return self.send_db_error(e)
         except Exception as e:
             return self.send_error_response(e)
+
+
+class getImgUrlApi(BaseHandler):
+    URL = '/api/cbeta/img_url'
+
+    canon_suffix_png = ['TS']
+
+    def post(self):
+        """ 下一页 """
+        try:
+            data = self.get_request_data()
+            rules = [
+                (v.not_empty, 'page_code'),
+                (v.is_page_code, 'page_code'),
+            ]
+            err = v.validate(data, rules)
+            if err:
+                return self.send_error_response(err)
+
+            img_url = ''
+            head = re.search(r'^([A-Z]{1,2})(\d+)n[A-Z]?\d+[A-Za-z]?_p([a-z]?\d+)', data['page_code'])
+            if canon_maps.get(head.group(1)) and canon_maps.get(head.group(1))[0]:
+                zang = canon_maps.get(head.group(1))[0]
+                suffix = 'png' if zang in self.canon_suffix_png else 'jpg'
+                img_code = '%s_%s_%s' % (zang, head.group(2).strip('0'), head.group(3).strip('0'))
+                img_url = self.get_img(img_code, suffix)
+
+            self.send_data_response({'img_url': img_url})
+
+        except DbError as e:
+            return self.send_db_error(e)

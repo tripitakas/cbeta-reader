@@ -8,6 +8,7 @@
 import re
 import logging
 import traceback
+import hashlib
 
 from bson import json_util
 from bson.errors import BSONError
@@ -243,6 +244,19 @@ class BaseHandler(CorsMixin, RequestHandler):
             nickname=nickname or self.current_user and self.current_user.get('name'),
             user_id=self.current_user and self.current_user.get('_id'), create_time=get_date_time(),
         ))
+
+    def get_img(self, img_page_code, suffix='jpg', resize=False):
+        host = self.config.get('img', {}).get('host')
+        salt = self.config.get('img', {}).get('salt')
+        if host and salt:
+            md5 = hashlib.md5()
+            md5.update((img_page_code + salt).encode('utf-8'))
+            hash_value = md5.hexdigest()
+            inner_path = '/'.join(img_page_code.split('_')[:-1])
+            url = '%s/pages/%s/%s_%s.%s' % (host, inner_path, img_page_code, hash_value, suffix)
+            url = url + '?x-oss-process=image/resize,m_lfit,h_300,w_300' if resize else url
+            return url
+        return False
 
     @gen.coroutine
     def call_back_api(self, url, handle_response, handle_error=None, **kwargs):

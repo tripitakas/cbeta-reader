@@ -33,6 +33,7 @@ role_maps = {
             '/@code': ['GET'],
             '/help': ['GET'],
             '/api/cbeta/mulu': ['POST'],
+            '/api/cbeta/img_url': ['POST'],
             '/api/cbeta/search': ['POST'],
             '/api/cbeta/prev_page': ['POST'],
             '/api/cbeta/next_page': ['POST'],
