@@ -197,16 +197,19 @@
 }
 
 .sub-line .btn-txt {
-    margin-top: 4px;
     font-size: 16px;
+    margin: 4px 3px;
 }
 
 .sub-line .btn-img {
     width: 16px;
     height: 16px;
-    margin: 6px 6px;
+    margin: 7px 7px;
     cursor: pointer;
-    transition: all 0.2s;
+}
+
+.sub-line .more {
+    margin-left: 0;
 }
 
 .sub-line .btn-img:hover {
@@ -222,14 +225,14 @@
 }
 
 .sub-line .m-pager {
-    margin-top: 4px;
+    margin-top: 5px;
 }
 
 .m-pager .btn-page {
     float: left;
     font-size: 14px;
     cursor: pointer;
-    padding: 0 6px;
+    margin: 0 3px;
     height: 20px;
     text-align: center;
     /*border-right: 1px dotted var(--Color_Grey_Middle);*/

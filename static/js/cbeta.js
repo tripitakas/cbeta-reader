@@ -222,7 +222,7 @@ $('.sub-line .article .btn-font-reduce').click(function () {
   $article.css('font-size', cur_size - 1);
 });
 
-// 收起第二行导航
+// 收起第二行工具栏
 $('.zoom .min-img').click(function () {
   $('.zoom .min-img').toggleClass('hide');
   $('.zoom .max-img').toggleClass('hide');
@@ -230,7 +230,7 @@ $('.zoom .min-img').click(function () {
   $('.main-right .content').css('padding-top', 40);
 });
 
-// 展开第二行导航
+// 展开第二行工具栏
 $('.zoom .max-img').click(function () {
   $('.zoom .min-img').toggleClass('hide');
   $('.zoom .max-img').toggleClass('hide');
