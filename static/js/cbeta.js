@@ -30,8 +30,11 @@ function view_sutra(page_code, clear_mulu) {
     // 清空目录信息
     if (clear_mulu === undefined || clear_mulu)
       mulu_info = '';
-
+    // 隐藏弹框
     hide_dlg();
+    // 设置锚点
+    window.location.hash = page_code;
+
   });
 }
 
@@ -87,6 +90,7 @@ function hide_dlg() {
 }
 
 function pad(num, len) {
+  num += "";
   return num.length < len ? num.padStart(len, "0") : num;
 }
 
@@ -104,6 +108,8 @@ $(window).resize(function () {
   $('#main-left').height(h);
   $('#main-right').height(h);
 });
+
+window.location.hash = '';
 
 //------------------顶部导航--------------------
 
@@ -188,6 +194,7 @@ $('.sub-line .article .btn-page.prev').click(function () {
 // 跳转下一卷
 $('.sub-line .article .btn-page.next').click(function () {
   var page_code = zang + pad(jing, 4) + '_' + pad(next, 3);
+  console.log(page_code);
   view_sutra(page_code, false);
 });
 
