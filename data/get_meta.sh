@@ -7,7 +7,7 @@ fi
 if [ ! -d data/meta/mulu ] ; then
     tar zxvf data/meta/mulu.tgz -C data/meta
 fi
-if [ ! -d data/xml/ori ] ; then
+if [ ! -d data/xml/ori/T ] ; then
     mkdir data/xml
     tar zxvf tests/xml/ori.tgz -C data/xml
 fi
