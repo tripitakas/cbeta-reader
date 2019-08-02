@@ -44,9 +44,32 @@ function view_sutra(page_code, clear_mulu) {
 
 var last_query = '';
 
+function getSearchScope() {
+  var currentScope = $('.m-header .scope-item.active').text().trim();
+  if (currentScope == '本经') {
+    return [zang + jing];
+  }
+  if (currentScope == '自定') {
+    var scope = [];
+    $('.search-scope input[type="checkbox"]:checked').each(function () {
+      var label = $(this).siblings('.checkbox-inline').text();
+      if (gSearchScopes[label] !== undefined) {
+        for (var i in gSearchScopes[label]) {
+          var sutra = gSearchScopes[label][i];
+          var start = sutra.indexOf('[') + 1;
+          var end = sutra.indexOf([']']);
+          scope.push(sutra.substring(start, end));
+        }
+      }
+    });
+    return scope;
+  }
+}
+
 function search(q, page) {
   if (q === '' || parseInt(page) < 1) return;
-  postApi('/cbeta/search', {'data': {'q': q, 'page': page}}, function (res) {
+  var data = {'q': q, 'page': page, 'scope': getSearchScope()};
+  postApi('/cbeta/search', {'data': data}, function (res) {
     var html = '';
     for (var i = 0, len = res.data.hits.length; i < len; i++) {
       var hit = res.data.hits[i];
@@ -63,28 +86,27 @@ function search(q, page) {
   });
 }
 
-function _get_sutra_maps() {
-  var sutra_maps = [];
-  for (var i = 0, len = cbeta_sutras.length; i < len; i++) {
-    sutra_maps[cbeta_sutras[i][0]] = cbeta_sutras[i];
-  }
-  return sutra_maps;
+var sutra_maps = [];
+var sutra2select = [];
+for (var i in cbeta_sutras) {
+  var sutra = cbeta_sutras[i];
+  sutra_maps[sutra[0]] = sutra;
+  sutra2select.push('[' + sutra[0] + ']' + sutra[1])
 }
 
-var sutra_maps = _get_sutra_maps();
-
-function _get_sutra_tips(sutra_code) {
+function get_sutra_tips(sutra_code) {
   var sutra = sutra_maps[sutra_code];
   if (sutra !== undefined)
     return sutra[1] + '(' + sutra[5] + '卷)[' + sutra[7] + ']';
 }
 
-function get_hit_html(sutra_code, page_code, text) {
-  var head = '<div class="result-head"><span class="btn-nav prev-page"><</span><span class="title">' + page_code
-      + '</span><span class="btn-nav next-page">></span><img class="btn-img btn-show-pic" src="/static/imgs/icon_pic.png">'
+function get_hit_html(sutra_code, page_code, txt) {
+  var head = '<div class="result-head"><span class="btn-nav prev-page"><</span>'
+      + '<span class="title">' + page_code + '</span><span class="btn-nav next-page">></span>'
+      + '<img class="btn-img btn-show-pic" src="/static/imgs/icon_pic.png">'
       + '<img class="btn-img btn-stick"></div>';
-  var name = '<div class="result-name">' + _get_sutra_tips(sutra_code) + '</div>';
-  var text = '<div class="result-text slim-scroll">' + text + '</div>';
+  var name = '<div class="result-name">' + get_sutra_tips(sutra_code) + '</div>';
+  var text = '<div class="result-text slim-scroll">' + txt + '</div>';
   return '<div class="result-item">' + head + name + text + '</div>';
 }
 
@@ -100,19 +122,19 @@ function pad(num, len) {
 
 //------------------页面初始化------------------
 
-// 高度自适应
 $(document).ready(function () {
+  // 高度自适应
   var h = $(document.body).height();
   $('#main-left').height(h);
   $('#main-right').height(h);
 });
 
 $(window).resize(function () {
+  // 高度自适应
   var h = $(document.body).height();
   $('#main-left').height(h);
   $('#main-right').height(h);
 });
-
 
 //------------------顶部导航--------------------
 
@@ -240,7 +262,6 @@ $('.zoom .max-img').click(function () {
   $('.m-header .sub-line').show();
   $('.main-right .content').css('padding-top', 70);
 });
-
 
 // 点击经文校勘记，显示弹框
 $('#content-article').on('click', '.note', function (e) {
@@ -436,33 +457,97 @@ $('.content-right .result-items').on('click', '.result-head .btn-stick', functio
   $('.content-center .result-items').append($(this).parent().parent());
 });
 
+//------------------配置检索范围------------------
 
 // 配置自定检索范围
-$('#my-select').multiSelect({
-  selectableHeader: "待选经名<input type='text' class='form-control search-input' id='selectable_input' placeholder='您可以输入关键字进行搜索'>",
-  selectionHeader: "已选经名<input type='text' class='form-control search-input' id='selected_input' placeholder='您可以输入关键字进行搜索'>",
-  selectableFooter: "<a class='left_btn' id='select_all_btn'>全选</a><a class='right_btn' id='select_all_search_btn'>全选所有搜索结果</a>",
-  selectionFooter: "<a class='left_btn' id='deselect_all_btn'>全删</a><a class='right_btn' id='deselect_all_search_btn'>删除所有搜索结果</a>",
+$('#my-multi-select').multiSelect({
+  selectableHeader: "待选经名<input type='text' class='form-control' id='selectable-input' placeholder='请输入关键字后回车进行搜索'><div>"
+      + "<i class='ser-btn'></i>",
+  selectionHeader: "已选经名<input type='text' class='form-control' id='selected-input' placeholder='请输入关键字进行搜索'>",
   selectableOptgroup: true,
-  afterSelect: function (val) {
-    console.log(val);
+});
+
+
+$(document).ready(function () {
+  $('#my-multi-select').html(sutra2select.map(function (p) {
+    return '<option value="' + p + '">' + p + '</option>';
+  }).join('\n'));
+  $('#my-multi-select').multiSelect('refresh');
+});
+
+// $('#searchConfigModal').on('shown.bs.modal', function () {});
+
+
+$("#searchConfigModal").on('click', '.ser-btn', function () {
+  var inputval = $('#selectable-input').val().trim();
+  var selections = $("#ms-my-multi-select").find('.ms-elem-selectable:not(.ms-selected)');
+  selections.each(function () {
+    var item_value = $(this).text();
+    if (item_value.match(inputval)) {
+      $(this).show();
+    } else {
+      $(this).hide();
+    }
+  });
+});
+
+// 待选对象-回车搜索
+$('.ms-selectable').on("keydown", "#selectable-input", function (event) {
+  var keyCode = event.keyCode || event.which;
+  if (keyCode === 13) {
+    $(".ms-selectable .ser-btn").click();
+    event.preventDefault();
   }
 });
 
-// 选中、新增检索分组
-function dblClickCheckbox() {
-  $('#searchConfigModal .checkbox-inline').removeClass('active');
-  $(this).addClass('active');
-  $('.cur-search-scope').text($(this).text());
-}
+// 已选对象-搜索
+$("#searchConfigModal").on('input propertychange', '#selected-input', function () {
+  var inputval = $(this).val().trim();
+  var selections = $("#ms-my-multi-select").find('.ms-elem-selection.ms-selected');
+  selections.each(function () {
+    var item_value = $(this).text();
+    if (item_value.match(inputval)) {
+      $(this).show();
+    } else {
+      $(this).hide();
+    }
+  });
+});
 
-$('#searchConfigModal .checkbox-inline').bind('dblclick', dblClickCheckbox);
+$.cookie.json = true;
 
-$('#searchConfigModal .add-search-scope').click(function () {
-  var scopeStr = "<span class='search-scope'><input type='checkbox'/><label class='checkbox-inline' contenteditable='true'>新建</label></span>";
+var gSearchScopes = [];
+if ($.cookie('searchScopes'))
+  gSearchScopes = $.cookie('searchScopes');  // 检索分组配置
+
+// 新增分组
+$('#searchConfigModal').on('click', '.add-search-scope', function () {
+  var scopeStr = "<span class='search-scope'><input type='checkbox'/>"
+      + "<label class='checkbox-inline' contenteditable='true'>新建</label></span>";
   $('#searchConfigModal .search-scope-groups').append(scopeStr);
   $('#searchConfigModal .search-scope-groups .checkbox-inline:last').focus();
-  $('#searchConfigModal .checkbox-inline').unbind('dblclick').bind('dblclick', dblClickCheckbox);
+});
+
+// 修改分组
+$('#searchConfigModal').on('dblclick', '.checkbox-inline', function () {
+  $('.cur-search-scope').text($(this).text());
+  $('#searchConfigModal .checkbox-inline').removeClass('active');
+  $(this).addClass('active');
+  $('#my-multi-select').multiSelect('deselect_all');
+  if (gSearchScopes.hasOwnProperty($(this).text()))
+    $('#my-multi-select').multiSelect('select', gSearchScopes[$(this).text()]);
+});
+
+// 保存当前分组配置
+$('#save-config').click(function () {
+  var group = $('.cur-search-scope').text();
+  gSearchScopes[group] = [];
+  var selections = $("#ms-my-multi-select").find('.ms-elem-selection.ms-selected');
+  selections.each(function () {
+    gSearchScopes[group].push($(this).text());
+  });
+  $.cookie('searchScopes', gSearchScopes);
+  showSuccess('已保存配置', '[' + group + ']组保存了' + selections.length + '篇经目。');
 });
 
 // 选择检索范围
@@ -563,6 +648,3 @@ $('#my-mulu-tree').bind("dblclick.jstree", function (event) {
   view_sutra(node.attr('title'), false);
   $('#muluModal').modal('hide');
 });
-
-
-

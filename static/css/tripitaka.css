@@ -705,3 +705,26 @@
     cursor: pointer;
     color: #000;
 }
+
+#searchConfigModal .ms-container .ser-btn {
+    margin-top: -25px;
+}
+
+#searchConfigModal #selected-input,
+#searchConfigModal #selectable-input
+{
+    margin-top: 5px;
+}
+
+#searchConfigModal a.left {
+    float: left;
+}
+
+#searchConfigModal a.right {
+    float: right;
+}
+
+#searchConfigModal .search-scope .checkbox-inline {
+    user-select: none;
+    -webkit-user-select: none;
+}

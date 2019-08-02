@@ -57,7 +57,7 @@ class SearchApi(BaseHandler):
             field = 'page_code' if m else 'normal'
             page = int(data.get('page', 1))
             sort = data.get('sort', 'score')
-            filter_sutra_codes = data.get('filter_sutra_codes')
+            filter_sutra_codes = data.get('scope')
             hits, total = search(data['q'], field=field, page=page, sort=sort, filter_sutra_codes=filter_sutra_codes)
             self.send_data_response({'hits': hits, 'total': total})
 

@@ -63,7 +63,7 @@
                     <span class="cur-scope" id="cur-scope">全部</span><span class="caret"></span>
                   </button>
                   <ul class="dropdown-menu scope-items">
-                    <li><a class="scope-item active" href="#">全部</a></li>
+                    <li><a class="scope-item active" title="#">全部</a></li>
                     <li><a class="scope-item" href="#">本经</a></li>
                     <li><a class="scope-item" href="#">自定</a></li>
                   </ul>
@@ -89,7 +89,7 @@
               <div class="btn-tools" style="margin-left: 10px">
                 <div class="btn-txt btn-font-enlarge" title="放大字体">A+</div>
                 <div class="btn-txt btn-font-reduce" title="缩小字体">A-</div>
-                <img class="btn-img btn-mulu" title="文章目次" data-toggle="modal" data-target="#muluModal" src="{{ static_url('imgs/icon_catalog.png') }}" />
+                <img class="btn-img btn-mulu" title="文章目次" data-toggle="modal" data-target="#muluModal" src="{{ static_url('imgs/icon_catalog.png') }}"/>
               </div>
               <div class="more">
                 <img src="{{ static_url('imgs/icon_more.png') }}" class="btn-img btn-more" title="更多"/>
@@ -165,7 +165,7 @@
 <!-- 配置自定检索范围 -->
 <div class="panel-body">
   <div id="searchConfigModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="choose-pages" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog" style="width: 50%">
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -182,21 +182,13 @@
           <br/>
           <h4 class="control-label">配置分组：<span class="cur-search-scope">唯识</span></h4>
           <div class="form-group">
-            <select multiple='multiple' id='my-select' name='my-select'>
-              <option value='经名1'>经名1</option>
-              <option value='经名2'>经名2</option>
-              <option value='经名3'>经名3</option>
-              <option value='经名4'>经名4</option>
-              <option value='经名5'>经名5</option>
-              <option value='经名6'>经名6</option>
-              <option value='经名7'>经名7</option>
-              <option value='经名8'>经名8</option>
+            <select multiple='multiple' id='my-multi-select' name='my-multi-select'>
             </select>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">取消</button>
-          <button type="button" class="btn btn-primary waves-effect waves-light">保存配置</button>
+          <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+          <button type="button" class="btn btn-primary" id="save-config">保存配置</button>
         </div>
       </div>
     </div>
@@ -279,6 +271,7 @@
 <script src="{{ static_url('assets/jquery-multi-select/jquery.quicksearch.js') }}"></script>
 <script src="https://cdn.datatables.net/v/bs/dt-1.10.18/datatables.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+<script src="https://cdn.staticfile.org/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
 <script src="{{ static_url('js/cbeta-sutra.js') }}"></script>
 <script src="{{ static_url('js/cbeta.js') }}"></script>
 
