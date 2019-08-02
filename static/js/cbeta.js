@@ -6,6 +6,11 @@
 
 //------------------全局变量及函数---------------
 
+function setUrl(url) {
+  var stateObject = {};
+  history.pushState(stateObject, 'CBETA', url);
+}
+
 var mulu_info = '';
 
 function view_sutra(page_code, clear_mulu) {
@@ -33,8 +38,7 @@ function view_sutra(page_code, clear_mulu) {
     // 隐藏弹框
     hide_dlg();
     // 设置锚点
-    window.location.hash = page_code;
-
+    setUrl('/'+page_code);
   });
 }
 
@@ -109,7 +113,6 @@ $(window).resize(function () {
   $('#main-right').height(h);
 });
 
-window.location.hash = '';
 
 //------------------顶部导航--------------------
 
@@ -547,7 +550,7 @@ $('#muluModal').on('shown.bs.modal', function (e) {
   if (mulu_info === '') {
     postApi('/cbeta/mulu', {'data': {'zang': zang, 'jing': jing}}, function (res) {
       mulu_info = res.data;
-      $('#my-mulu-tree').jstree(true).settings.core.data=mulu_info;
+      $('#my-mulu-tree').jstree(true).settings.core.data = mulu_info;
       $('#my-mulu-tree').jstree(true).refresh();
     });
   }
@@ -559,3 +562,6 @@ $('#my-mulu-tree').bind("dblclick.jstree", function (event) {
   view_sutra(node.attr('title'), false);
   $('#muluModal').modal('hide');
 });
+
+
+
