@@ -30,14 +30,14 @@ def format_hits(hits, shrink=True):
     :param shrink 是否缩起来 """
 
     def merge_kw(txt):
-        # 将<kw>一</kw>，<kw>二</kw>格式替换为<kw>一，二</kw>
+        # "<kw>一</kw>，<kw>二</kw>"格式转换为"<kw>一，二</kw>"
         regex = r'[，、：；。？！“”‘’「」『』（）%&*◎—……]+'
         txt = re.sub('</kw>(%s)<kw>' % regex, lambda r: r.group(1), txt)
         # 合并相邻的关键字
         txt = re.sub('</kw><kw>', '', txt)
         return txt
 
-    def shrink(txt):
+    def shrink_txt(txt):
         """ 将检索结果缩起来，以便前端显示 """
         s, e = txt.find('<kw>'), txt.rfind('</kw>')
         return '<span class="shrink">%s</span>%s<span class="shrink">%s</span>' % (txt[:s], txt[s:e + 5], txt[e + 5:])
@@ -53,7 +53,7 @@ def format_hits(hits, shrink=True):
             'score': hit['_score'],
             'page_code': hit['_source'].get('page_code'),
             'sutra_code': hit['_source'].get('sutra_code'),
-            'normal': shrink(normal) if shrink else normal,
+            'normal': shrink_txt(normal) if shrink else normal,
         }
 
     return hits
@@ -71,13 +71,13 @@ def search(q, field='normal', page=1, sort='score', filter_sutra_codes=None, ind
         return []
 
     q = pre_filter(q) if field == 'normal' else q
-    sort = [{'page_code': 'asc'}, '_score'] if sort == 'page_code' else ['_score', {'page_code': 'asc'}]
+    sort = [{'page_code': 'asc'}, '_score'] if sort == 'page_code' else ['_score']
     highlight = {'pre_tags': ['<kw>'], 'post_tags': ['</kw>'], 'fields': {'normal': {}}}
     dsl = {
-        'size': 10,
-        'from': 10 * (int(page) - 1),
-        'sort': sort,
-        'highlight': highlight,
+        # 'size': 10,
+        # 'from': 10 * (int(page) - 1),
+        # 'sort': sort,
+        # 'highlight': highlight,
         'query': {
             'bool': {
                 'must': {
@@ -87,7 +87,8 @@ def search(q, field='normal', page=1, sort='score', filter_sutra_codes=None, ind
         },
     }
     if filter_sutra_codes:
-        dsl['query']['bool']['filter'] = [{'terms': {'sutra_code': filter_sutra_codes}}]
+        # dsl['query']['bool']['filter'] = [{'terms': {'sutra_code': filter_sutra_codes}}]
+        dsl['query']['bool']['filter'] = [{'term': {'sutra_code': filter_sutra_codes[0]}}]
 
     es = Elasticsearch(hosts=get_hosts())
     r = es.search(index=index, body=dsl)

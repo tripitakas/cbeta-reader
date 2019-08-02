@@ -134,7 +134,7 @@
 }
 
 .main-line .search .search-input {
-    padding-left: 70px;
+    padding: 0 35px 0 70px;
     width: 300px;
     border: 1px solid #dfe1e5;
     border-radius: 24px;
@@ -586,6 +586,10 @@
 
 #text-selected-dlg ul li {
     height: 30px;
+    -webkit-user-select:none;
+    -moz-user-select:none;
+    -o-user-select:none;
+    user-select:none;
 }
 
 #text-selected-dlg ul li span {
@@ -593,6 +597,10 @@
     width: 80px;
     padding-left: 8px;
     cursor: pointer;
+    -webkit-user-select:none;
+    -moz-user-select:none;
+    -o-user-select:none;
+    user-select:none;
 }
 
 .modal-content.black-bg {

@@ -38,7 +38,7 @@ function view_sutra(page_code, clear_mulu) {
     // 隐藏弹框
     hide_dlg();
     // 设置锚点
-    setUrl('/'+page_code);
+    setUrl('/' + page_code);
   });
 }
 
@@ -303,8 +303,9 @@ $('.main-content .content-left').mouseup(function (e) {
 
 // 复制文字
 $('#text-selected-dlg #copy-text').click(function () {
-  document.execCommand("copy");
-  $('#text-selected-dlg').hide();
+  if (document.execCommand("copy")) {
+    $('#text-selected-dlg').hide();
+  }
 });
 
 // 引用复制
