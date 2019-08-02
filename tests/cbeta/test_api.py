@@ -42,7 +42,8 @@ class TestApi(APITestCase):
         self.assertIsNotNone(r3)
 
         # 测试指定经目范围
-        sutra_codes = ['T0675', 'B0045']
+        q = '比丘'
+        sutra_codes = ['T0013', 'T0050', 'T0016', 'T0057']
         r4, total = search(q, filter_sutra_codes=sutra_codes)
         self.assertIsNotNone(r4)
 

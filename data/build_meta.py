@@ -27,7 +27,7 @@ from elasticsearch.exceptions import ElasticsearchException
 
 config = Application.load_config()['esearch']
 BM_PATH = config.get('BM_u8') or '/home/sm/cbeta/BM_u8'
-juan_path = path.join(path.dirname(__file__), 'cbeta-juan')
+juan_path = path.join(path.dirname(__file__), 'meta', 'juan')
 re_head_parts = re.compile(r'^([A-Z]{1,2})(\d+)n([A-Z]?\d+)([A-Za-z_]?)p([a-z]?\d+)([a-z]\d+)?')
 output = dict(pages=[], miss_juan=[])
 
@@ -63,13 +63,10 @@ def add_page(index, rows, page_code, juan, line=0):
 
         try:
             '''
-            page_code: 页名，由册别、经号、别本、页号组成，例如 A091n1057_p0319
             canon_code: 藏经代码，例如 A、T
-            book_no: 册号，例如 091
-            book_code: 册别，藏经代码+册号，例如 A091、GA001
-            sutra_no: 经号，例如 1057、A042
             sutra_code: 典籍编号，藏经代码+经号，例如 A1057
-            page_no: 页号，例如 0319、b005
+            book_code: 册别，藏经代码+册号，例如 A091、GA001
+            page_code: 页名，由册别、经号、别本、页号组成，例如 A091n1057_p0319
             juan: 本页的卷号
             origin: 原始文本，部分组字式已替换为生僻字
             normal: 规范文本，是对原始文本的异体字转换为规范字的结果
@@ -79,10 +76,9 @@ def add_page(index, rows, page_code, juan, line=0):
             '''
             if index is not None:
                 index(body=dict(
-                    page_code=page_code, canon_code=canon_code, book_no=book_no, book_code=book_code, juan=juan,
-                    sutra_no=sutra_no, sutra_code=sutra_code, edition=edition, page_no=page_no,
-                    origin=origin, normal=normal, lines=len(rows), char_count=count, updated_time=datetime.now())
-                )
+                    canon_code=canon_code, sutra_code=sutra_code, book_code=book_code, page_code=page_code, juan=juan,
+                    origin=origin, normal=normal, lines=len(rows), char_count=count, updated_time=datetime.now()
+                ))
             else:
                 output['pages'].append(dict(page_code=page_code, juan=juan, origin=[origin[0], origin[-1]],
                                             lines=len(rows), char_count=count))
@@ -91,8 +87,7 @@ def add_page(index, rows, page_code, juan, line=0):
                 if line < 0:
                     codes = [p['page_code'] for p in output['pages']]
                     with open('build.log', 'a') as f:
-                        f.write('%s %d pages\n%s\n' % (
-                            book_code, len(output['pages']), ', '.join(codes)))
+                        f.write('%s %d pages\n%s\n' % (book_code, len(output['pages']), ', '.join(codes)))
                     with open(path.join(path.dirname(__file__), 'build_log', page_code + '.json'), 'w') as f:
                         json.dump(output['pages'], f, ensure_ascii=False)
                     output['pages'] = []
@@ -160,13 +155,13 @@ def scan_and_index_dir(index, source, book_code):
         print('%s error pages\n%s' % (len(errors), errors))
 
 
-def build_db(index='cb4ocr-ik', bm_path=BM_PATH, mode='create', book_code='', split='ik'):
+def build_db(index='cb4ocr-ik', bm_path=BM_PATH, mode='create', book_code='', split=True):
     """ 基于CBETA文本创建索引，以便ocr寻找比对文本使用
     :param index: 索引名称，为空时可做数据遍历检查，不导入到es库
     :param bm_path: BM_u8文本目录
     :param mode: 'create'表示新建，'update'表示更新
     :param book_code: 仅导入指定册别的页面
-    :param split: 中文分词器的名称，如'ik'或'jieba'
+    :param split: 是否使用中文分词器
     """
     es = index and Elasticsearch(hosts=[config])
     if not es:
@@ -178,20 +173,12 @@ def build_db(index='cb4ocr-ik', bm_path=BM_PATH, mode='create', book_code='', sp
     else:
         es.indices.open(index=index, ignore=400)
 
-    if split == 'ik':
+    if split:
         mapping = {'properties': {
             'normal': {'type': 'text', 'analyzer': 'ik_max_word', 'search_analyzer': 'ik_smart'},
             'origin': {'type': 'text', 'analyzer': 'ik_max_word', 'search_analyzer': 'ik_smart'},
             'page_code': {'type': 'text', 'fielddata': True},
-            'sutra_code': {'type': 'text', 'fielddata': True},
-        }}
-        es.indices.put_mapping(index=index, body=mapping)
-    elif split == 'jieba':
-        mapping = {'properties': {
-            'normal': {'type': 'text', 'analyzer': 'jieba_index', 'search_analyzer': 'jieba_index'},
-            'origin': {'type': 'text', 'analyzer': 'jieba_index', 'search_analyzer': 'jieba_index'},
-            'page_code': {'type': 'text', 'fielddata': True},
-            'sutra_code': {'type': 'text', 'fielddata': True},
+            'sutra_code': {'type': 'keyword', 'index': True},
         }}
         es.indices.put_mapping(index=index, body=mapping)
 

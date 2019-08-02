@@ -74,21 +74,14 @@ def search(q, field='normal', page=1, sort='score', filter_sutra_codes=None, ind
     sort = [{'page_code': 'asc'}, '_score'] if sort == 'page_code' else ['_score']
     highlight = {'pre_tags': ['<kw>'], 'post_tags': ['</kw>'], 'fields': {'normal': {}}}
     dsl = {
-        # 'size': 10,
-        # 'from': 10 * (int(page) - 1),
-        # 'sort': sort,
-        # 'highlight': highlight,
-        'query': {
-            'bool': {
-                'must': {
-                    'match': {field: q}
-                }
-            }
-        },
+        'size': 10,
+        'from': 10 * (int(page) - 1),
+        'sort': sort,
+        'highlight': highlight,
+        'query': {'bool': {'must': {'match': {field: q}}}},
     }
     if filter_sutra_codes:
-        # dsl['query']['bool']['filter'] = [{'terms': {'sutra_code': filter_sutra_codes}}]
-        dsl['query']['bool']['filter'] = [{'term': {'sutra_code': filter_sutra_codes[0]}}]
+        dsl['query']['bool']['filter'] = [{'terms': {'sutra_code': filter_sutra_codes}}]
 
     es = Elasticsearch(hosts=get_hosts())
     r = es.search(index=index, body=dsl)
