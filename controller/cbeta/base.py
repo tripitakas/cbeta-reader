@@ -51,9 +51,9 @@ class CbetaBaseHandler(BaseHandler):
         fuzzy_name = '%s*n%s_%03d.xml' % (zang, jing, int(juan))
         xml_file = glob(os.path.join(XML_DIR, 'ori', zang, '**', fuzzy_name))
         if not xml_file:
-            for i in range(5):
+            for i in range(1, 6):
                 try_name = '%s*n%s_%03d.xml' % (zang, jing, int(juan) + 1 + i)
-                xml_file = glob(os.path.join(XML_DIR, 'ori', zang, '**', fuzzy_name))
+                xml_file = glob(os.path.join(XML_DIR, 'ori', zang, '**', try_name))
                 if xml_file:
                     fuzzy_name = try_name
                     break
