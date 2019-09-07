@@ -30,6 +30,7 @@ role_maps = {
         'remark': '任何人都可访问，无需登录',
         'routes': {
             '/': ['GET'],
+            '/api': ['GET'],
             '/@code': ['GET'],
             '/help': ['GET'],
             '/api/cbeta/search': ['POST'],
@@ -54,7 +55,6 @@ role_maps = {
         'is_assignable': True,
         'roles': ['普通用户'],
         'routes': {
-            '/api': ['GET'],
             '/api/code/(.+)': ['GET'],
             '/admin': ['GET'],
             '/user/(admin|role)': ['GET'],
