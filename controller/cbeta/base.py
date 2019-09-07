@@ -51,6 +51,13 @@ class CbetaBaseHandler(BaseHandler):
         fuzzy_name = '%s*n%s_%03d.xml' % (zang, jing, int(juan))
         xml_file = glob(os.path.join(XML_DIR, 'ori', zang, '**', fuzzy_name))
         if not xml_file:
+            for i in range(5):
+                try_name = '%s*n%s_%03d.xml' % (zang, jing, int(juan) + 1 + i)
+                xml_file = glob(os.path.join(XML_DIR, 'ori', zang, '**', fuzzy_name))
+                if xml_file:
+                    fuzzy_name = try_name
+                    break
+        if not xml_file:
             logging.warning('ori/%s not exist' % fuzzy_name)
             return self.send_error_response(errors.xml_file_not_found, render=render)
         content = self.tran_xml(xml_file[0])

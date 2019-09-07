@@ -17,7 +17,7 @@ from controller.role import url_placeholder
 from tornado.options import define, options
 from yaml import load as load_yml, SafeLoader
 
-__version__ = '0.0.2.900801-dev'
+__version__ = '0.0.3.900907'
 BASE_DIR = path.dirname(path.dirname(__file__))
 
 define('testing', default=False, help='the testing mode', type=bool)
@@ -30,7 +30,7 @@ class Application(web.Application):
         self._db = self.config = self.site = None
         self.init_config(settings.get('db_name_ext'))
 
-        self.version = __version__
+        self.version = __version__ + '-dev'
         self.BASE_DIR = BASE_DIR
         self.handlers = handlers
 
